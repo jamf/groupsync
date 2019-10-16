@@ -7,6 +7,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var version = "undefined"
+
 var rootCmd = &cobra.Command{
 	Use:   "groupsync",
 	Short: "Groupsync is a tool for syncing LDAP groups with GitHub teams.",

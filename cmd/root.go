@@ -1,3 +1,6 @@
+// Package cmd contains all the CLI logic, backed by Cobra. `root.go`
+// provides the root command, which is the entry point to all the Cobra stuff.
+// Other files define subcommands.
 package cmd
 
 import (
@@ -18,6 +21,8 @@ var rootCmd = &cobra.Command{
 	},
 }
 
+// Execute runs the root CLI command handler, backed by Cobra.
+// It parses parameters, flags, etc. and calls subcommands where appropriate.
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)

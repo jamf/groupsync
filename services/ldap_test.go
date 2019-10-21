@@ -15,37 +15,41 @@ import (
 )
 
 var client = LDAP{
-	port:       389,
-	server:     "127.0.0.1",
-	ssl:        false,
-	skipVerify: false,
+	cfg: LDAPConfig{
+		port:       389,
+		server:     "127.0.0.1",
+		ssl:        false,
+		skipVerify: false,
 
-	bindUser:     "cn=admin,dc=planetexpress,dc=com",
-	bindPassword: "GoodNewsEveryone",
+		bindUser:     "cn=admin,dc=planetexpress,dc=com",
+		bindPassword: "GoodNewsEveryone",
 
-	userBaseDN:        "ou=people,dc=planetexpress,dc=com",
-	groupBaseDN:       "ou=people,dc=planetexpress,dc=com",
-	userClass:         "person",
-	searchAttribute:   "memberOf",
-	usernameAttribute: "uid",
-	emailAttribute:    "mail",
+		userBaseDN:        "ou=people,dc=planetexpress,dc=com",
+		groupBaseDN:       "ou=people,dc=planetexpress,dc=com",
+		userClass:         "person",
+		searchAttribute:   "memberOf",
+		usernameAttribute: "uid",
+		emailAttribute:    "mail",
+	},
 }
 
 var sslClient = LDAP{
-	port:       636,
-	server:     "127.0.0.1",
-	ssl:        true,
-	skipVerify: true,
+	cfg: LDAPConfig{
+		port:       636,
+		server:     "127.0.0.1",
+		ssl:        true,
+		skipVerify: true,
 
-	bindUser:     "cn=admin,dc=planetexpress,dc=com",
-	bindPassword: "GoodNewsEveryone",
+		bindUser:     "cn=admin,dc=planetexpress,dc=com",
+		bindPassword: "GoodNewsEveryone",
 
-	userBaseDN:        "ou=people,dc=planetexpress,dc=com",
-	groupBaseDN:       "ou=people,dc=planetexpress,dc=com",
-	userClass:         "person",
-	searchAttribute:   "memberOf",
-	usernameAttribute: "uid",
-	emailAttribute:    "mail",
+		userBaseDN:        "ou=people,dc=planetexpress,dc=com",
+		groupBaseDN:       "ou=people,dc=planetexpress,dc=com",
+		userClass:         "person",
+		searchAttribute:   "memberOf",
+		usernameAttribute: "uid",
+		emailAttribute:    "mail",
+	},
 }
 
 // Test cases

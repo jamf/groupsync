@@ -13,7 +13,20 @@ import (
 	"github.com/docker/go-connections/nat"
 )
 
-// Test cases
+var client = LDAP{
+	port:       389,
+	server:     "127.0.0.1",
+	ssl:        false,
+	skipVerify: false,
+
+	bindUser:     "cn=admin,dc=planetexpress,dc=com",
+	bindPassword: "GoodNewsEveryone",
+
+	userBaseDN:      "ou=people,dc=planetexpress,dc=com",
+	groupBaseDN:     "ou=people,dc=planetexpress,dc=com",
+	userClass:       "person",
+	searchAttribute: "memberOf",
+}
 
 var sslClient = LDAP{
 	port:       636,
@@ -30,14 +43,23 @@ var sslClient = LDAP{
 	searchAttribute: "memberOf",
 }
 
+// Test cases
+
 func TestLDAP(t *testing.T) {
 	ldapTeardown := setupLDAPService(t)
 	defer ldapTeardown(t)
 
-	sslClient.connect()
-	defer sslClient.close()
+	testClient(t, client)
+	testClient(t, sslClient)
+}
 
-	actualResults := sslClient.members("ship_crew").Entries
+// Helpers
+
+func testClient(t *testing.T, client LDAP) {
+	client.connect()
+	defer client.close()
+
+	actualResults := client.members("ship_crew").Entries
 
 	expectedResults := map[string]bool{
 		"cn=Bender Bending Rodríguez,ou=people,dc=planetexpress,dc=com": false,
@@ -59,8 +81,6 @@ func TestLDAP(t *testing.T) {
 		}
 	}
 }
-
-// Helpers
 
 func setupLDAPService(t *testing.T) func(t *testing.T) {
 	t.Log("Setting up an LDAP server container...")

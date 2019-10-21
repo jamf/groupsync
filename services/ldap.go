@@ -60,6 +60,8 @@ func (l *LDAP) connect() {
 	l.conn = c
 }
 
+// GroupMembers returns the members of group `group` as a slice of User
+// instances. Implements the Service interface.
 func (l LDAP) GroupMembers(group string) ([]User, error) {
 	var attrs []string
 	for _, attr := range []string{l.usernameAttribute, l.emailAttribute} {

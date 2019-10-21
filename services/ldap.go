@@ -38,6 +38,13 @@ type LDAPConfig struct {
 	emailAttribute    string
 }
 
+// NewLDAP creates a new instance of LDAP with the provided configuration.
+func NewLDAP(cfg LDAPConfig) LDAP {
+	return LDAP{
+		cfg: cfg,
+	}
+}
+
 func (l *LDAPConfig) connect() *ldap.Conn {
 	var c *ldap.Conn
 	var err error

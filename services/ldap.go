@@ -20,22 +20,22 @@ type LDAP struct {
 // particular scheme used.
 type LDAPConfig struct {
 	// Connection
-	port       int32
-	server     string
-	ssl        bool
-	skipVerify bool
+	Port       int32 `mapstructure:"port"`
+	Server     string
+	SSL        bool
+	SkipVerify bool
 
 	// Auth
-	bindUser     string
-	bindPassword string
+	BindUser     string
+	BindPassword string
 
 	// Schema
-	userBaseDN        string
-	groupBaseDN       string
-	userClass         string
-	searchAttribute   string
-	usernameAttribute string
-	emailAttribute    string
+	UserBaseDN        string
+	GroupBaseDN       string
+	UserClass         string
+	SearchAttribute   string
+	UsernameAttribute string
+	EmailAttribute    string
 }
 
 // NewLDAP creates a new instance of LDAP with the provided configuration.
@@ -49,18 +49,18 @@ func (l *LDAPConfig) connect() *ldap.Conn {
 	var c *ldap.Conn
 	var err error
 
-	if l.ssl {
+	if l.SSL {
 		c, err = ldap.DialTLS(
 			"tcp",
-			fmt.Sprintf("%s:%d", l.server, l.port),
+			fmt.Sprintf("%s:%d", l.Server, l.Port),
 			&tls.Config{
-				InsecureSkipVerify: l.skipVerify,
+				InsecureSkipVerify: l.SkipVerify,
 			},
 		)
 	} else {
 		c, err = ldap.Dial(
 			"tcp",
-			fmt.Sprintf("%s:%d", l.server, l.port),
+			fmt.Sprintf("%s:%d", l.Server, l.Port),
 		)
 	}
 
@@ -81,7 +81,7 @@ func (l *LDAP) connect() {
 // instances. Implements the Service interface.
 func (l LDAP) GroupMembers(group string) ([]User, error) {
 	var attrs []string
-	for _, attr := range []string{l.cfg.usernameAttribute, l.cfg.emailAttribute} {
+	for _, attr := range []string{l.cfg.UsernameAttribute, l.cfg.EmailAttribute} {
 		if attr != "" {
 			attrs = append(attrs, attr)
 		}
@@ -99,14 +99,14 @@ func (l LDAP) GroupMembers(group string) ([]User, error) {
 
 	filter := fmt.Sprintf(
 		"(&(objectClass=%s)(%s=cn=%s,%s))",
-		l.cfg.userClass,
-		l.cfg.searchAttribute,
+		l.cfg.UserClass,
+		l.cfg.SearchAttribute,
 		group,
-		l.cfg.groupBaseDN,
+		l.cfg.GroupBaseDN,
 	)
 
 	result, err := l.conn.Search(&ldap.SearchRequest{
-		BaseDN:     l.cfg.userBaseDN,
+		BaseDN:     l.cfg.UserBaseDN,
 		Filter:     filter,
 		Scope:      1,
 		Attributes: attrs,
@@ -119,22 +119,22 @@ func (l LDAP) GroupMembers(group string) ([]User, error) {
 
 	for _, e := range result.Entries {
 		member := User{}
-		if l.cfg.usernameAttribute != "" {
-			member.username = e.GetAttributeValue(l.cfg.usernameAttribute)
+		if l.cfg.UsernameAttribute != "" {
+			member.username = e.GetAttributeValue(l.cfg.UsernameAttribute)
 			if member.username == "" {
 				panic(fmt.Sprintf(
 					"Failed to get username (%s) for %s",
-					l.cfg.usernameAttribute,
+					l.cfg.UsernameAttribute,
 					e.DN,
 				))
 			}
 		}
-		if l.cfg.emailAttribute != "" {
-			member.email = e.GetAttributeValue(l.cfg.emailAttribute)
+		if l.cfg.EmailAttribute != "" {
+			member.email = e.GetAttributeValue(l.cfg.EmailAttribute)
 			if member.email == "" {
 				panic(fmt.Sprintf(
 					"Failed to get e-mail (%s) for %s",
-					l.cfg.emailAttribute,
+					l.cfg.EmailAttribute,
 					e.DN,
 				))
 			}
@@ -143,8 +143,8 @@ func (l LDAP) GroupMembers(group string) ([]User, error) {
 		members = append(
 			members,
 			User{
-				username: e.GetAttributeValue(l.cfg.usernameAttribute),
-				email:    e.GetAttributeValue(l.cfg.emailAttribute),
+				username: e.GetAttributeValue(l.cfg.UsernameAttribute),
+				email:    e.GetAttributeValue(l.cfg.EmailAttribute),
 			},
 		)
 	}

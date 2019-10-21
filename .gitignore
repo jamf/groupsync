@@ -2,6 +2,9 @@
 # Created by https://www.gitignore.io/api/go,sublimetext,visualstudiocode
 # Edit at https://www.gitignore.io/?templates=go,sublimetext,visualstudiocode
 
+### groupsync configuration ###
+groupsync.toml
+
 ### Go ###
 # Binaries for programs and plugins
 *.exe

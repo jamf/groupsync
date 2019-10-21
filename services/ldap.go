@@ -23,10 +23,12 @@ type LDAP struct {
 	bindPassword string
 
 	// Schema
-	userBaseDN      string
-	groupBaseDN     string
-	userClass       string
-	searchAttribute string
+	userBaseDN        string
+	groupBaseDN       string
+	userClass         string
+	searchAttribute   string
+	usernameAttribute string
+	emailAttribute    string
 }
 
 func (l *LDAP) connect() {
@@ -57,7 +59,18 @@ func (l *LDAP) connect() {
 	l.conn = c
 }
 
-func (l LDAP) members(group string) *ldap.SearchResult {
+func (l LDAP) members(group string) []User {
+	var attrs []string
+	for _, attr := range []string{l.usernameAttribute, l.emailAttribute} {
+		if attr != "" {
+			attrs = append(attrs, attr)
+		}
+	}
+
+	if len(attrs) < 1 {
+		panic("LDAP config didn't provide any attributes to look up!")
+	}
+
 	if l.conn == nil {
 		panic("No LDAP connection!")
 	}
@@ -71,15 +84,50 @@ func (l LDAP) members(group string) *ldap.SearchResult {
 	)
 
 	result, err := l.conn.Search(&ldap.SearchRequest{
-		BaseDN: l.userBaseDN,
-		Filter: filter,
-		Scope:  1,
+		BaseDN:     l.userBaseDN,
+		Filter:     filter,
+		Scope:      1,
+		Attributes: attrs,
 	})
 	if err != nil {
 		panic(err)
 	}
 
-	return result
+	var members []User
+
+	for _, e := range result.Entries {
+		member := User{}
+		if l.usernameAttribute != "" {
+			member.username = e.GetAttributeValue(l.usernameAttribute)
+			if member.username == "" {
+				panic(fmt.Sprintf(
+					"Failed to get username (%s) for %s",
+					l.usernameAttribute,
+					e.DN,
+				))
+			}
+		}
+		if l.emailAttribute != "" {
+			member.email = e.GetAttributeValue(l.emailAttribute)
+			if member.email == "" {
+				panic(fmt.Sprintf(
+					"Failed to get e-mail (%s) for %s",
+					l.emailAttribute,
+					e.DN,
+				))
+			}
+		}
+
+		members = append(
+			members,
+			User{
+				username: e.GetAttributeValue(l.usernameAttribute),
+				email:    e.GetAttributeValue(l.emailAttribute),
+			},
+		)
+	}
+
+	return members
 }
 
 func (l *LDAP) close() {

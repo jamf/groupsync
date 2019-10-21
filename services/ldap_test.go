@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"fmt"
+	"reflect"
 	"testing"
 	"time"
 
@@ -22,10 +23,12 @@ var client = LDAP{
 	bindUser:     "cn=admin,dc=planetexpress,dc=com",
 	bindPassword: "GoodNewsEveryone",
 
-	userBaseDN:      "ou=people,dc=planetexpress,dc=com",
-	groupBaseDN:     "ou=people,dc=planetexpress,dc=com",
-	userClass:       "person",
-	searchAttribute: "memberOf",
+	userBaseDN:        "ou=people,dc=planetexpress,dc=com",
+	groupBaseDN:       "ou=people,dc=planetexpress,dc=com",
+	userClass:         "person",
+	searchAttribute:   "memberOf",
+	usernameAttribute: "uid",
+	emailAttribute:    "mail",
 }
 
 var sslClient = LDAP{
@@ -37,10 +40,12 @@ var sslClient = LDAP{
 	bindUser:     "cn=admin,dc=planetexpress,dc=com",
 	bindPassword: "GoodNewsEveryone",
 
-	userBaseDN:      "ou=people,dc=planetexpress,dc=com",
-	groupBaseDN:     "ou=people,dc=planetexpress,dc=com",
-	userClass:       "person",
-	searchAttribute: "memberOf",
+	userBaseDN:        "ou=people,dc=planetexpress,dc=com",
+	groupBaseDN:       "ou=people,dc=planetexpress,dc=com",
+	userClass:         "person",
+	searchAttribute:   "memberOf",
+	usernameAttribute: "uid",
+	emailAttribute:    "mail",
 }
 
 // Test cases
@@ -59,26 +64,52 @@ func testClient(t *testing.T, client LDAP) {
 	client.connect()
 	defer client.close()
 
-	actualResults := client.members("ship_crew").Entries
+	actualResults := client.members("ship_crew")
 
-	expectedResults := map[string]bool{
-		"cn=Bender Bending Rodríguez,ou=people,dc=planetexpress,dc=com": false,
-		"cn=Philip J. Fry,ou=people,dc=planetexpress,dc=com":            false,
-		"cn=Turanga Leela,ou=people,dc=planetexpress,dc=com":            false,
+	expectedResults := []User{
+		User{
+			username: "bender",
+			email:    "bender@planetexpress.com",
+		},
+		User{
+			username: "fry",
+			email:    "fry@planetexpress.com",
+		},
+		User{
+			username: "leela",
+			email:    "leela@planetexpress.com",
+		},
+	}
+
+	expectedResultsOrig := expectedResults
+
+	if len(actualResults) != len(expectedResults) {
+		panic(fmt.Sprintf(
+			"Actual and expected results differ.\nActual:\n%+v\nExpected:\n%+v\n",
+			actualResults,
+			expectedResults,
+		))
 	}
 
 	for _, member := range actualResults {
-		t.Log(member.DN)
-		expectedResults[member.DN] = true
+		t.Log(member)
+		for i := range expectedResults {
+			if reflect.DeepEqual(expectedResults[i], member) {
+				expectedResults = append(
+					expectedResults[:i],
+					expectedResults[i+1:]...,
+				)
+				break
+			}
+		}
 	}
 
-	for person, exists := range expectedResults {
-		if !exists {
-			panic(fmt.Sprintf(
-				"One of the expected search results wasn't there:\n%s",
-				person,
-			))
-		}
+	if len(expectedResults) > 0 {
+		panic(fmt.Sprintf(
+			"Actual and expected results differ.\nActual:\n%+v\nExpected:\n%+v\n",
+			actualResults,
+			expectedResultsOrig,
+		))
 	}
 }
 

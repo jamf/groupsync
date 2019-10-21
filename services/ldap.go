@@ -2,6 +2,7 @@ package services
 
 import (
 	"crypto/tls"
+	"errors"
 	"fmt"
 
 	"gopkg.in/ldap.v3"
@@ -59,7 +60,7 @@ func (l *LDAP) connect() {
 	l.conn = c
 }
 
-func (l LDAP) members(group string) []User {
+func (l LDAP) GroupMembers(group string) ([]User, error) {
 	var attrs []string
 	for _, attr := range []string{l.usernameAttribute, l.emailAttribute} {
 		if attr != "" {
@@ -68,11 +69,13 @@ func (l LDAP) members(group string) []User {
 	}
 
 	if len(attrs) < 1 {
-		panic("LDAP config didn't provide any attributes to look up!")
+		return nil,
+			errors.New("LDAP config didn't provide any attributes to look up")
 	}
 
 	if l.conn == nil {
-		panic("No LDAP connection!")
+		return nil,
+			errors.New("no LDAP connection")
 	}
 
 	filter := fmt.Sprintf(
@@ -90,7 +93,7 @@ func (l LDAP) members(group string) []User {
 		Attributes: attrs,
 	})
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	var members []User
@@ -127,7 +130,7 @@ func (l LDAP) members(group string) []User {
 		)
 	}
 
-	return members
+	return members, nil
 }
 
 func (l *LDAP) close() {

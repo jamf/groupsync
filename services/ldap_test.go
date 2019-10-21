@@ -64,7 +64,10 @@ func testClient(t *testing.T, client LDAP) {
 	client.connect()
 	defer client.close()
 
-	actualResults := client.members("ship_crew")
+	actualResults, err := client.GroupMembers("ship_crew")
+	if err != nil {
+		panic(err)
+	}
 
 	expectedResults := []User{
 		User{

@@ -188,7 +188,7 @@ func (l *LDAP) findGroup(g string) (string, error) {
 		return "", fmt.Errorf("error looking up group %s: %s", g, err)
 	}
 
-	if len(result.Entries) < 0 {
+	if len(result.Entries) < 1 {
 		return "", fmt.Errorf("group `%s` not found", g)
 	} else if len(result.Entries) > 1 {
 		return "", fmt.Errorf("multiple groups found for `%s`", g)

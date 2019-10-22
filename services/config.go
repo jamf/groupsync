@@ -19,7 +19,7 @@ func initConfig() config {
 	viper.AddConfigPath(".")
 	err := viper.ReadInConfig()
 	if err != nil {
-		panic(fmt.Errorf("fatal error config file: %s", err))
+		panic(fmt.Errorf("fatal error reading config file: %s", err))
 	}
 
 	var c config

@@ -15,6 +15,8 @@ func SvcFromString(name string) (Service, error) {
 	switch name {
 	case "ldap":
 		return NewLDAP(), nil
+	case "github":
+		return NewGitHub(), nil
 	default:
 		return nil, fmt.Errorf(
 			"no service %s defined",

@@ -7,7 +7,8 @@ import (
 )
 
 type config struct {
-	LDAP LDAPConfig
+	LDAP   LDAPConfig
+	GitHub GitHubConfig
 }
 
 var cfg *config = nil

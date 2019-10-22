@@ -1,19 +1,18 @@
-package main
+package services
 
 import (
 	"fmt"
 
 	"github.com/spf13/viper"
-
-	"stash.jamf.build/devops/groupsync/services"
 )
 
 type config struct {
-	Test string
-	LDAP services.LDAPConfig
+	LDAP LDAPConfig
 }
 
-func getConfig() config {
+var cfg = initConfig()
+
+func initConfig() config {
 	viper.SetConfigName("groupsync")
 	viper.AddConfigPath("/etc/groupsync/")
 	viper.AddConfigPath("$HOME/.groupsync/")

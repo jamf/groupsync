@@ -20,28 +20,28 @@ type LDAP struct {
 // particular scheme used.
 type LDAPConfig struct {
 	// Connection
-	Port       int32 `mapstructure:"port"`
+	Port       int32
 	Server     string
 	SSL        bool
-	SkipVerify bool
+	SkipVerify bool `mapstructure:"skip_verify"`
 
 	// Auth
-	BindUser     string
-	BindPassword string
+	BindUser     string `mapstructure:"bind_user"`
+	BindPassword string `mapstructure:"bind_password"`
 
 	// Schema
-	UserBaseDN        string
-	GroupBaseDN       string
-	UserClass         string
-	SearchAttribute   string
-	UsernameAttribute string
-	EmailAttribute    string
+	UserBaseDN        string `mapstructure:"user_base_dn"`
+	GroupBaseDN       string `mapstructure:"group_base_dn"`
+	UserClass         string `mapstructure:"user_class"`
+	SearchAttribute   string `mapstructure:"search_attribute"`
+	UsernameAttribute string `mapstructure:"username_attribute"`
+	EmailAttribute    string `mapstructure:"email_attribute"`
 }
 
 // NewLDAP creates a new instance of LDAP with the provided configuration.
-func NewLDAP(cfg LDAPConfig) LDAP {
-	return LDAP{
-		cfg: cfg,
+func NewLDAP() *LDAP {
+	return &LDAP{
+		cfg: cfg.LDAP,
 	}
 }
 
@@ -70,6 +70,11 @@ func (l *LDAPConfig) connect() *ldap.Conn {
 		)
 	}
 
+	err = c.Bind(l.BindUser, l.BindPassword)
+	if err != nil {
+		panic(err)
+	}
+
 	return c
 }
 
@@ -79,7 +84,10 @@ func (l *LDAP) connect() {
 
 // GroupMembers returns the members of group `group` as a slice of User
 // instances. Implements the Service interface.
-func (l LDAP) GroupMembers(group string) ([]User, error) {
+func (l *LDAP) GroupMembers(group string) ([]User, error) {
+	l.connect()
+	defer l.close()
+
 	var attrs []string
 	for _, attr := range []string{l.cfg.UsernameAttribute, l.cfg.EmailAttribute} {
 		if attr != "" {
@@ -97,19 +105,25 @@ func (l LDAP) GroupMembers(group string) ([]User, error) {
 			errors.New("no LDAP connection")
 	}
 
+	// Get the DN of the group.
+	group, err := l.findGroup(group)
+	if err != nil {
+		return nil, err
+	}
+
 	filter := fmt.Sprintf(
-		"(&(objectClass=%s)(%s=cn=%s,%s))",
+		"(&(objectClass=%s)(%s=%s))",
 		l.cfg.UserClass,
 		l.cfg.SearchAttribute,
 		group,
-		l.cfg.GroupBaseDN,
 	)
 
 	result, err := l.conn.Search(&ldap.SearchRequest{
-		BaseDN:     l.cfg.UserBaseDN,
-		Filter:     filter,
-		Scope:      1,
-		Attributes: attrs,
+		BaseDN:       l.cfg.UserBaseDN,
+		Filter:       filter,
+		Scope:        2,
+		DerefAliases: 1,
+		Attributes:   attrs,
 	})
 	if err != nil {
 		return nil, err
@@ -150,6 +164,37 @@ func (l LDAP) GroupMembers(group string) ([]User, error) {
 	}
 
 	return members, nil
+}
+
+// Returns the DN of an LDAP group or an error if not found.
+func (l *LDAP) findGroup(g string) (string, error) {
+	if l.conn == nil {
+		l.connect()
+		defer l.close()
+	}
+
+	filter := fmt.Sprintf(
+		"(&(objectClass=group)(cn=%s))",
+		g,
+	)
+
+	result, err := l.conn.Search(&ldap.SearchRequest{
+		BaseDN:       l.cfg.GroupBaseDN,
+		Filter:       filter,
+		Scope:        2,
+		DerefAliases: 1,
+	})
+	if err != nil {
+		return "", fmt.Errorf("error looking up group %s: %s", g, err)
+	}
+
+	if len(result.Entries) < 0 {
+		return "", fmt.Errorf("group `%s` not found", g)
+	} else if len(result.Entries) > 1 {
+		return "", fmt.Errorf("multiple groups found for `%s`", g)
+	}
+
+	return result.Entries[0].DN, nil
 }
 
 func (l *LDAP) close() {

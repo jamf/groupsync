@@ -65,9 +65,6 @@ func TestLDAP(t *testing.T) {
 // Helpers
 
 func testClient(t *testing.T, client LDAP) {
-	client.connect()
-	defer client.close()
-
 	actualResults, err := client.GroupMembers("ship_crew")
 	if err != nil {
 		panic(err)

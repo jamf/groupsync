@@ -10,23 +10,27 @@ type config struct {
 	LDAP LDAPConfig
 }
 
-var cfg = initConfig()
+var cfg *config = nil
 
-func initConfig() config {
-	viper.SetConfigName("groupsync")
-	viper.AddConfigPath("/etc/groupsync/")
-	viper.AddConfigPath("$HOME/.groupsync/")
-	viper.AddConfigPath(".")
-	err := viper.ReadInConfig()
-	if err != nil {
-		panic(fmt.Errorf("fatal error reading config file: %s", err))
+func getConfig() config {
+	if cfg == nil {
+		viper.SetConfigName("groupsync")
+		viper.AddConfigPath("/etc/groupsync/")
+		viper.AddConfigPath("$HOME/.groupsync/")
+		viper.AddConfigPath(".")
+		err := viper.ReadInConfig()
+		if err != nil {
+			panic(fmt.Errorf("fatal error reading config file: %s", err))
+		}
+
+		var c config
+		err = viper.Unmarshal(&c)
+		if err != nil {
+			panic(fmt.Errorf("fatal error unmarshalling config: %s", err))
+		}
+
+		cfg = &c
+		return c
 	}
-
-	var c config
-	err = viper.Unmarshal(&c)
-	if err != nil {
-		panic(fmt.Errorf("fatal error unmarshalling config: %s", err))
-	}
-
-	return c
+	return *cfg
 }

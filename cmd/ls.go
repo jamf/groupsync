@@ -5,7 +5,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"stash.jamf.build/devops/groupsync/services"
+	"github.com/jamf/groupsync/services"
 )
 
 func init() {

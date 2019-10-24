@@ -1,4 +1,4 @@
-module stash.jamf.build/devops/groupsync
+module github.com/jamf/groupsync
 
 go 1.13
 

@@ -1,7 +1,7 @@
 package main
 
 import (
-	"stash.jamf.build/devops/groupsync/cmd"
+	"github.com/jamf/groupsync/cmd"
 )
 
 func main() {

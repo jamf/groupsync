@@ -33,7 +33,7 @@ var lsCmd = &cobra.Command{
 				)
 				continue
 			}
-			fmt.Printf("%+v\n", members)
+			fmt.Println(services.SprintUsers(members))
 		}
 	},
 }

@@ -15,6 +15,33 @@ type LDAP struct {
 	cfg  LDAPConfig
 }
 
+type LDAPUser struct {
+	username string
+	mail     string
+}
+
+// Implement the User interface.
+func (u LDAPUser) samlUsername() (string, error) {
+	un := u.username
+	if un == "" {
+		return "", fmt.Errorf("empty username for LDAP user")
+	}
+
+	return un, nil
+}
+
+func (u LDAPUser) email() (string, error) {
+	m := u.mail
+	if m == "" {
+		return "", fmt.Errorf(
+			"empty username for LDAP user `%s`",
+			u.username,
+		)
+	}
+
+	return m, nil
+}
+
 // LDAPConfig contains all the info needed to connect to (and authenticate with)
 // an LDAP instance, as well as how to fetch group membership data from the
 // particular scheme used.
@@ -132,7 +159,7 @@ func (l *LDAP) GroupMembers(group string) ([]User, error) {
 	var members []User
 
 	for _, e := range result.Entries {
-		member := User{}
+		member := LDAPUser{}
 		if l.cfg.UsernameAttribute != "" {
 			member.username = e.GetAttributeValue(l.cfg.UsernameAttribute)
 			if member.username == "" {
@@ -144,8 +171,8 @@ func (l *LDAP) GroupMembers(group string) ([]User, error) {
 			}
 		}
 		if l.cfg.EmailAttribute != "" {
-			member.email = e.GetAttributeValue(l.cfg.EmailAttribute)
-			if member.email == "" {
+			member.mail = e.GetAttributeValue(l.cfg.EmailAttribute)
+			if member.mail == "" {
 				panic(fmt.Sprintf(
 					"Failed to get e-mail (%s) for %s",
 					l.cfg.EmailAttribute,
@@ -156,9 +183,9 @@ func (l *LDAP) GroupMembers(group string) ([]User, error) {
 
 		members = append(
 			members,
-			User{
+			LDAPUser{
 				username: e.GetAttributeValue(l.cfg.UsernameAttribute),
-				email:    e.GetAttributeValue(l.cfg.EmailAttribute),
+				mail:     e.GetAttributeValue(l.cfg.EmailAttribute),
 			},
 		)
 	}

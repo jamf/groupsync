@@ -70,18 +70,18 @@ func testClient(t *testing.T, client LDAP) {
 		panic(err)
 	}
 
-	expectedResults := []User{
-		User{
+	expectedResults := []LDAPUser{
+		LDAPUser{
 			username: "bender",
-			email:    "bender@planetexpress.com",
+			mail:     "bender@planetexpress.com",
 		},
-		User{
+		LDAPUser{
 			username: "fry",
-			email:    "fry@planetexpress.com",
+			mail:     "fry@planetexpress.com",
 		},
-		User{
+		LDAPUser{
 			username: "leela",
-			email:    "leela@planetexpress.com",
+			mail:     "leela@planetexpress.com",
 		},
 	}
 

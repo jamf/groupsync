@@ -18,6 +18,17 @@ type GitHubConfig struct {
 	Org   string
 }
 
+type GitHubUser struct {
+	User struct {
+		Name  string
+		Email string
+		Login string
+	}
+	SamlIdentity struct {
+		NameID string `graphql:"nameId"`
+	} `graphql:"samlIdentity"`
+}
+
 func NewGitHub() *GitHub {
 	return &GitHub{
 		cfg: getConfig().GitHub,
@@ -77,4 +88,51 @@ func (g *GitHub) initClient() {
 
 		g.client = githubv4.NewClient(httpClient)
 	}
+}
+
+func (g *GitHub) getAllGitHubUsers() ([]GitHubUser, error) {
+	g.initClient()
+
+	var samlQuery struct {
+		Viewer struct {
+			Organization struct {
+				SamlIdentityProvider struct {
+					ExternalIdentities struct {
+						Edges []struct {
+							Node GitHubUser
+						}
+					} `graphql:"externalIdentities(first:20 after:0)"`
+				}
+			} `graphql:"organization(login: $org)"`
+		}
+	}
+
+	vars := map[string]interface{}{
+		"org": githubv4.String(g.cfg.Org),
+	}
+
+	err := g.client.Query(
+		context.Background(),
+		&samlQuery,
+		vars,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	var result []GitHubUser
+
+	for _, e := range samlQuery.Viewer.Organization.
+		SamlIdentityProvider.ExternalIdentities.Edges {
+		result = append(result, e.Node)
+	}
+
+	if result == nil {
+		return nil, fmt.Errorf(
+			"no SAML identities found in the GitHub org `%s` at all",
+			g.cfg.Org,
+		)
+	}
+
+	return result, nil
 }

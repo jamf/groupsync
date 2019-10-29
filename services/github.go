@@ -101,7 +101,7 @@ func (g *GitHub) getAllGitHubUsers() ([]GitHubUser, error) {
 						Edges []struct {
 							Node GitHubUser
 						}
-					} `graphql:"externalIdentities(first:20 after:0)"`
+					} `graphql:"externalIdentities(first:20 after:null)"`
 				}
 			} `graphql:"organization(login: $org)"`
 		}

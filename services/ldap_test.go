@@ -24,12 +24,11 @@ var client = LDAP{
 		BindUser:     "cn=admin,dc=planetexpress,dc=com",
 		BindPassword: "GoodNewsEveryone",
 
-		UserBaseDN:        "ou=people,dc=planetexpress,dc=com",
-		GroupBaseDN:       "ou=people,dc=planetexpress,dc=com",
-		UserClass:         "person",
-		SearchAttribute:   "memberOf",
-		UsernameAttribute: "uid",
-		EmailAttribute:    "mail",
+		UserBaseDN:      "ou=people,dc=planetexpress,dc=com",
+		GroupBaseDN:     "ou=people,dc=planetexpress,dc=com",
+		UserClass:       "person",
+		SearchAttribute: "memberOf",
+		UserIDAttribute: "uid",
 	},
 }
 
@@ -43,12 +42,11 @@ var sslClient = LDAP{
 		BindUser:     "cn=admin,dc=planetexpress,dc=com",
 		BindPassword: "GoodNewsEveryone",
 
-		UserBaseDN:        "ou=people,dc=planetexpress,dc=com",
-		GroupBaseDN:       "ou=people,dc=planetexpress,dc=com",
-		UserClass:         "person",
-		SearchAttribute:   "memberOf",
-		UsernameAttribute: "uid",
-		EmailAttribute:    "mail",
+		UserBaseDN:      "ou=people,dc=planetexpress,dc=com",
+		GroupBaseDN:     "ou=people,dc=planetexpress,dc=com",
+		UserClass:       "person",
+		SearchAttribute: "memberOf",
+		UserIDAttribute: "uid",
 	},
 }
 
@@ -70,20 +68,32 @@ func testClient(t *testing.T, client LDAP) {
 		panic(err)
 	}
 
-	expectedResults := []LDAPUser{
-		LDAPUser{
-			username: "bender",
-			mail:     "bender@planetexpress.com",
-		},
-		LDAPUser{
-			username: "fry",
-			mail:     "fry@planetexpress.com",
-		},
-		LDAPUser{
-			username: "leela",
-			mail:     "leela@planetexpress.com",
-		},
+	expectedResults := []User{
+		newUser(),
+		newUser(),
+		newUser(),
 	}
+
+	expectedResults[0].addIdentity(
+		"ldap",
+		LDAPIdentity{
+			id: "bender",
+		},
+	)
+
+	expectedResults[1].addIdentity(
+		"ldap",
+		LDAPIdentity{
+			id: "fry",
+		},
+	)
+
+	expectedResults[2].addIdentity(
+		"ldap",
+		LDAPIdentity{
+			id: "leela",
+		},
+	)
 
 	expectedResultsOrig := expectedResults
 

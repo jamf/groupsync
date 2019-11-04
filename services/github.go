@@ -18,7 +18,7 @@ type GitHubConfig struct {
 	Org   string
 }
 
-type GitHubUser struct {
+type GitHubIdentity struct {
 	User struct {
 		Name  string
 		Email string
@@ -29,11 +29,19 @@ type GitHubUser struct {
 	} `graphql:"samlIdentity"`
 }
 
+// Implement Identity for GitHubIdentity
+
+func (i GitHubIdentity) uniqueID() string {
+	return i.User.Login
+}
+
 func NewGitHub() *GitHub {
 	return &GitHub{
 		cfg: getConfig().GitHub,
 	}
 }
+
+// Implement Service for GitHub
 
 func (g *GitHub) GroupMembers(group string) ([]User, error) {
 	g.initClient()
@@ -79,6 +87,15 @@ func (g *GitHub) GroupMembers(group string) ([]User, error) {
 	return nil, nil
 }
 
+func (g *GitHub) getSvcIdentity(identities map[string]Identity) (Identity, error) {
+	_, ok := identities["ldap"]
+	if ok {
+		return NoneIdentity{}, nil
+	}
+
+	return nil, fmt.Errorf("couldn't get the GitHub ID for user\n")
+}
+
 func (g *GitHub) initClient() {
 	if g.client == nil {
 		src := oauth2.StaticTokenSource(
@@ -90,7 +107,7 @@ func (g *GitHub) initClient() {
 	}
 }
 
-func (g *GitHub) getAllGitHubUsers() ([]GitHubUser, error) {
+func (g *GitHub) getAllGitHubIdentities() ([]GitHubIdentity, error) {
 	g.initClient()
 
 	var samlQuery struct {
@@ -99,7 +116,7 @@ func (g *GitHub) getAllGitHubUsers() ([]GitHubUser, error) {
 				SamlIdentityProvider struct {
 					ExternalIdentities struct {
 						Edges []struct {
-							Node GitHubUser
+							Node GitHubIdentity
 						}
 					} `graphql:"externalIdentities(first:20 after:null)"`
 				}
@@ -120,7 +137,7 @@ func (g *GitHub) getAllGitHubUsers() ([]GitHubUser, error) {
 		return nil, err
 	}
 
-	var result []GitHubUser
+	var result []GitHubIdentity
 
 	for _, e := range samlQuery.Viewer.Organization.
 		SamlIdentityProvider.ExternalIdentities.Edges {

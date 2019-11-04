@@ -15,34 +15,20 @@ type LDAP struct {
 	cfg  LDAPConfig
 }
 
-type LDAPUser struct {
-	username string
-	mail     string
+type LDAPIdentity struct {
+	id string
 }
 
-// Implement the User interface.
-func (u LDAPUser) samlUsername() (string, error) {
-	un := u.username
-	if un == "" {
-		return "", fmt.Errorf("empty username for LDAP user")
+// Implement the Identity interface.
+func (i LDAPIdentity) uniqueID() string {
+	if i.id == "" {
+		panic("empty unique ID for LDAP identity")
 	}
 
-	return un, nil
+	return i.id
 }
 
-func (u LDAPUser) email() (string, error) {
-	m := u.mail
-	if m == "" {
-		return "", fmt.Errorf(
-			"empty username for LDAP user `%s`",
-			u.username,
-		)
-	}
-
-	return m, nil
-}
-
-// LDAPConfig contains all the info needed to connect to (and authenticate with)
+// LDAPConfig contains all the ino needed to connect to (and authenticate with)
 // an LDAP instance, as well as how to fetch group membership data from the
 // particular scheme used.
 type LDAPConfig struct {
@@ -57,12 +43,11 @@ type LDAPConfig struct {
 	BindPassword string `mapstructure:"bind_password"`
 
 	// Schema
-	UserBaseDN        string `mapstructure:"user_base_dn"`
-	GroupBaseDN       string `mapstructure:"group_base_dn"`
-	UserClass         string `mapstructure:"user_class"`
-	SearchAttribute   string `mapstructure:"search_attribute"`
-	UsernameAttribute string `mapstructure:"username_attribute"`
-	EmailAttribute    string `mapstructure:"email_attribute"`
+	UserBaseDN      string `mapstructure:"user_base_dn"`
+	GroupBaseDN     string `mapstructure:"group_base_dn"`
+	UserClass       string `mapstructure:"user_class"`
+	SearchAttribute string `mapstructure:"search_attribute"`
+	UserIDAttribute string `mapstructure:"user_id_attribute"`
 }
 
 // NewLDAP creates a new instance of LDAP with the provided configuration.
@@ -116,7 +101,7 @@ func (l *LDAP) GroupMembers(group string) ([]User, error) {
 	defer l.close()
 
 	var attrs []string
-	for _, attr := range []string{l.cfg.UsernameAttribute, l.cfg.EmailAttribute} {
+	for _, attr := range []string{l.cfg.UserIDAttribute} {
 		if attr != "" {
 			attrs = append(attrs, attr)
 		}
@@ -159,38 +144,43 @@ func (l *LDAP) GroupMembers(group string) ([]User, error) {
 	var members []User
 
 	for _, e := range result.Entries {
-		member := LDAPUser{}
-		if l.cfg.UsernameAttribute != "" {
-			member.username = e.GetAttributeValue(l.cfg.UsernameAttribute)
-			if member.username == "" {
+		member := LDAPIdentity{}
+		if l.cfg.UserIDAttribute != "" {
+			member.id = e.GetAttributeValue(l.cfg.UserIDAttribute)
+			if member.id == "" {
 				panic(fmt.Sprintf(
-					"Failed to get username (%s) for %s",
-					l.cfg.UsernameAttribute,
-					e.DN,
-				))
-			}
-		}
-		if l.cfg.EmailAttribute != "" {
-			member.mail = e.GetAttributeValue(l.cfg.EmailAttribute)
-			if member.mail == "" {
-				panic(fmt.Sprintf(
-					"Failed to get e-mail (%s) for %s",
-					l.cfg.EmailAttribute,
+					"Failed to get user ID (%s) for %s",
+					l.cfg.UserIDAttribute,
 					e.DN,
 				))
 			}
 		}
 
+		u := newUser()
+		u.addIdentity("ldap", member)
+
 		members = append(
 			members,
-			LDAPUser{
-				username: e.GetAttributeValue(l.cfg.UsernameAttribute),
-				mail:     e.GetAttributeValue(l.cfg.EmailAttribute),
-			},
+			u,
 		)
 	}
 
 	return members, nil
+}
+
+func (l *LDAP) getSvcIdentity(identities map[string]Identity) (Identity, error) {
+	ghID, ok := identities["github"]
+	if ok {
+		// TODO: make sure this person exists in the directory!
+
+		ldapID := LDAPIdentity{
+			id: ghID.(GitHubIdentity).SamlIdentity.NameID,
+		}
+
+		return ldapID, nil
+	}
+
+	return nil, fmt.Errorf("couldn't get the GitHub ID for user")
 }
 
 // Returns the DN of an LDAP group or an error if not found.

@@ -127,7 +127,7 @@ func (l *LDAP) GroupMembers(group string) ([]User, error) {
 		"(&(objectClass=%s)(%s=%s))",
 		l.cfg.UserClass,
 		l.cfg.SearchAttribute,
-		group,
+		ldap.EscapeFilter(group),
 	)
 
 	result, err := l.conn.Search(&ldap.SearchRequest{
@@ -192,7 +192,7 @@ func (l *LDAP) findGroup(g string) (string, error) {
 
 	filter := fmt.Sprintf(
 		"(&(objectClass=group)(cn=%s))",
-		g,
+		ldap.EscapeFilter(g),
 	)
 
 	result, err := l.conn.Search(&ldap.SearchRequest{

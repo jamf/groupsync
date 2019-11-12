@@ -174,7 +174,7 @@ func (l *LDAP) getSvcIdentity(identities map[string]Identity) (Identity, error) 
 		// TODO: make sure this person exists in the directory!
 
 		ldapID := LDAPIdentity{
-			id: ghID.(GitHubIdentity).SamlIdentity.NameID,
+			id: ghID.(GitHubSAMLMapping).SamlIdentity.NameID,
 		}
 
 		return ldapID, nil

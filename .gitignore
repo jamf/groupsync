@@ -2,6 +2,8 @@
 # Created by https://www.gitignore.io/api/go,sublimetext,visualstudiocode
 # Edit at https://www.gitignore.io/?templates=go,sublimetext,visualstudiocode
 
+services/github_test.go
+
 ### groupsync configuration ###
 groupsync.toml
 

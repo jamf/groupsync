@@ -18,7 +18,9 @@ type GitHubConfig struct {
 	Org   string
 }
 
-type GitHubIdentity struct {
+// GitHubSAMLMapping represents a mapping of a GitHub identity to a SAML
+// identity.
+type GitHubSAMLMapping struct {
 	User struct {
 		Name  string
 		Email string
@@ -31,7 +33,7 @@ type GitHubIdentity struct {
 
 // Implement Identity for GitHubIdentity
 
-func (i GitHubIdentity) uniqueID() string {
+func (i GitHubSAMLMapping) uniqueID() string {
 	return i.User.Login
 }
 
@@ -107,18 +109,44 @@ func (g *GitHub) initClient() {
 	}
 }
 
-func (g *GitHub) getAllGitHubIdentities() ([]GitHubIdentity, error) {
+// getAllGitHubMappings fetches all the mappings of GitHub identities to SAML
+// identities within the given org.
+func (g *GitHub) getAllGitHubMappings() ([]GitHubSAMLMapping, error) {
 	g.initClient()
 
-	var samlQuery struct {
+	var result []GitHubSAMLMapping
+
+	var firstQuery struct {
 		Viewer struct {
 			Organization struct {
 				SamlIdentityProvider struct {
 					ExternalIdentities struct {
 						Edges []struct {
-							Node GitHubIdentity
+							Node GitHubSAMLMapping
 						}
-					} `graphql:"externalIdentities(first:20 after:null)"`
+						PageInfo struct {
+							EndCursor   string
+							HasNextPage bool
+						}
+					} `graphql:"externalIdentities(first:20)"`
+				}
+			} `graphql:"organization(login: $org)"`
+		}
+	}
+
+	var nextQuery struct {
+		Viewer struct {
+			Organization struct {
+				SamlIdentityProvider struct {
+					ExternalIdentities struct {
+						Edges []struct {
+							Node GitHubSAMLMapping
+						}
+						PageInfo struct {
+							EndCursor   string
+							HasNextPage bool
+						}
+					} `graphql:"externalIdentities(first:20 after:$page_cursor)"`
 				}
 			} `graphql:"organization(login: $org)"`
 		}
@@ -130,18 +158,47 @@ func (g *GitHub) getAllGitHubIdentities() ([]GitHubIdentity, error) {
 
 	err := g.client.Query(
 		context.Background(),
-		&samlQuery,
+		&firstQuery,
 		vars,
 	)
 	if err != nil {
 		return nil, err
 	}
 
-	var result []GitHubIdentity
-
-	for _, e := range samlQuery.Viewer.Organization.
+	for _, e := range firstQuery.Viewer.Organization.
 		SamlIdentityProvider.ExternalIdentities.Edges {
 		result = append(result, e.Node)
+	}
+
+	hasNextPage := firstQuery.Viewer.Organization.SamlIdentityProvider.
+		ExternalIdentities.PageInfo.HasNextPage
+	cursor := firstQuery.Viewer.Organization.SamlIdentityProvider.
+		ExternalIdentities.PageInfo.EndCursor
+
+	for hasNextPage {
+		vars = map[string]interface{}{
+			"org":         githubv4.String(g.cfg.Org),
+			"page_cursor": githubv4.String(cursor),
+		}
+
+		err := g.client.Query(
+			context.Background(),
+			&nextQuery,
+			vars,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		for _, e := range nextQuery.Viewer.Organization.
+			SamlIdentityProvider.ExternalIdentities.Edges {
+			result = append(result, e.Node)
+		}
+
+		hasNextPage = nextQuery.Viewer.Organization.SamlIdentityProvider.
+			ExternalIdentities.PageInfo.HasNextPage
+		cursor = nextQuery.Viewer.Organization.SamlIdentityProvider.
+			ExternalIdentities.PageInfo.EndCursor
 	}
 
 	if result == nil {

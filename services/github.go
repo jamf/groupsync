@@ -18,10 +18,21 @@ type GitHubConfig struct {
 	Org   string
 }
 
+type GitHubIdentity struct {
+	ID   string
+	Name string
+}
+
+// Implement Identity for GitHubIdentity
+func (i GitHubIdentity) uniqueID() string {
+	return i.ID
+}
+
 // GitHubSAMLMapping represents a mapping of a GitHub identity to a SAML
 // identity.
 type GitHubSAMLMapping struct {
 	User struct {
+		ID    string
 		Name  string
 		Email string
 		Login string

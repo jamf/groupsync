@@ -169,15 +169,11 @@ func (l *LDAP) GroupMembers(group string) ([]User, error) {
 }
 
 func (l *LDAP) getSvcIdentity(identities map[string]Identity) (Identity, error) {
-	ghID, ok := identities["github"]
+	_, ok := identities["github"]
 	if ok {
-		// TODO: make sure this person exists in the directory!
+		// unimplemented
 
-		ldapID := LDAPIdentity{
-			id: ghID.(GitHubSAMLMapping).SamlIdentity.NameID,
-		}
-
-		return ldapID, nil
+		return nil, nil
 	}
 
 	return nil, fmt.Errorf("couldn't get the GitHub ID for user")

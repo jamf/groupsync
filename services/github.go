@@ -42,12 +42,6 @@ type GitHubSAMLMapping struct {
 	} `graphql:"samlIdentity"`
 }
 
-// Implement Identity for GitHubIdentity
-
-func (i GitHubSAMLMapping) uniqueID() string {
-	return i.User.Login
-}
-
 func NewGitHub() *GitHub {
 	return &GitHub{
 		cfg: getConfig().GitHub,
@@ -68,7 +62,6 @@ func (g *GitHub) GroupMembers(group string) ([]User, error) {
 						Edges []struct {
 							Node GitHubIdentity
 						}
-					}
 					}
 				} `graphql:"team(slug: $grp)"`
 			} `graphql:"organization(login: $org)"`
@@ -126,10 +119,10 @@ func (g *GitHub) initClient() {
 
 // getAllGitHubMappings fetches all the mappings of GitHub identities to SAML
 // identities within the given org.
-func (g *GitHub) getAllGitHubMappings() ([]GitHubSAMLMapping, error) {
+func (g *GitHub) getAllGitHubMappings() (map[string]GitHubSAMLMapping, error) {
 	g.initClient()
 
-	var result []GitHubSAMLMapping
+	result := make(map[string]GitHubSAMLMapping)
 
 	var firstQuery struct {
 		Viewer struct {
@@ -182,7 +175,7 @@ func (g *GitHub) getAllGitHubMappings() ([]GitHubSAMLMapping, error) {
 
 	for _, e := range firstQuery.Viewer.Organization.
 		SamlIdentityProvider.ExternalIdentities.Edges {
-		result = append(result, e.Node)
+		result[e.Node.User.ID] = e.Node
 	}
 
 	hasNextPage := firstQuery.Viewer.Organization.SamlIdentityProvider.
@@ -207,7 +200,7 @@ func (g *GitHub) getAllGitHubMappings() ([]GitHubSAMLMapping, error) {
 
 		for _, e := range nextQuery.Viewer.Organization.
 			SamlIdentityProvider.ExternalIdentities.Edges {
-			result = append(result, e.Node)
+			result[e.Node.User.ID] = e.Node
 		}
 
 		hasNextPage = nextQuery.Viewer.Organization.SamlIdentityProvider.

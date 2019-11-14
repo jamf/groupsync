@@ -19,13 +19,17 @@ type GitHubConfig struct {
 }
 
 type GitHubIdentity struct {
-	ID   string
-	Name string
+	ID    string
+	Login string
 }
 
 // Implement Identity for GitHubIdentity
 func (i GitHubIdentity) uniqueID() string {
 	return i.ID
+}
+
+func (i GitHubIdentity) String() string {
+	return fmt.Sprintf("github{uid: %s, login: %s}", i.ID, i.Login)
 }
 
 // GitHubSAMLMapping represents a mapping of a GitHub identity to a SAML

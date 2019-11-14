@@ -28,6 +28,10 @@ func (i LDAPIdentity) uniqueID() string {
 	return i.id
 }
 
+func (i LDAPIdentity) String() string {
+	return fmt.Sprintf("ldap{uid: %s}", i.uniqueID())
+}
+
 // LDAPConfig contains all the ino needed to connect to (and authenticate with)
 // an LDAP instance, as well as how to fetch group membership data from the
 // particular scheme used.

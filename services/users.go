@@ -1,14 +1,22 @@
 package services
 
 import (
+	"bytes"
 	"fmt"
-	"strings"
 )
 
 // User is used to identify users by their unique data acquired from
 // services.
 type User struct {
 	identities map[string]Identity
+}
+
+func (u User) String() string {
+	buf := bytes.Buffer{}
+	for _, id := range u.identities {
+		buf.WriteString(fmt.Sprintf("%s ", id))
+	}
+	return buf.String()
 }
 
 func newUser() User {
@@ -21,12 +29,17 @@ func (u *User) addIdentity(svc string, i Identity) {
 
 type Identity interface {
 	uniqueID() string
+	String() string
 }
 
 type NoneIdentity struct{}
 
 func (_ NoneIdentity) uniqueID() string {
 	panic("identity doesn't exist")
+}
+
+func (_ NoneIdentity) String() string {
+	return ""
 }
 
 func IdentityExists(i Identity) bool {
@@ -56,27 +69,4 @@ func (u *User) getIdentity(svc_name string) (Identity, error) {
 	// Both store the identity and return it
 	u.identities[svc_name] = id
 	return id, nil
-}
-
-func SprintUser(u User) string {
-	var result []string
-
-	for svc, id := range u.identities {
-		result = append(
-			result,
-			fmt.Sprintf("%s: %s", svc, id.uniqueID()),
-		)
-	}
-
-	return strings.Join(result, ", ")
-}
-
-func SprintUsers(users []User) string {
-	var userStrings []string
-
-	for _, i := range users {
-		userStrings = append(userStrings, SprintUser(i))
-	}
-
-	return strings.Join(userStrings, "\n")
 }

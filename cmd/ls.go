@@ -33,7 +33,9 @@ var lsCmd = &cobra.Command{
 				)
 				continue
 			}
-			fmt.Println(services.SprintUsers(members))
+			for _, m := range members {
+				fmt.Println(m)
+			}
 		}
 	},
 }

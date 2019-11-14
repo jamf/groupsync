@@ -66,11 +66,9 @@ func (g *GitHub) GroupMembers(group string) ([]User, error) {
 					Name    string
 					Members struct {
 						Edges []struct {
-							Node struct {
-								ID   string
-								Name string
-							}
+							Node GitHubIdentity
 						}
+					}
 					}
 				} `graphql:"team(slug: $grp)"`
 			} `graphql:"organization(login: $org)"`
@@ -95,9 +93,15 @@ func (g *GitHub) GroupMembers(group string) ([]User, error) {
 		return nil, fmt.Errorf("Cannot find GitHub team called \"%s\"", group)
 	}
 
-	fmt.Println(membersQuery.Viewer.Organization.Team)
+	var result []User
 
-	return nil, nil
+	for _, entry := range membersQuery.Viewer.Organization.Team.Members.Edges {
+		user := newUser()
+		user.addIdentity("github", entry.Node)
+		result = append(result, user)
+	}
+
+	return result, nil
 }
 
 func (g *GitHub) getSvcIdentity(identities map[string]Identity) (Identity, error) {

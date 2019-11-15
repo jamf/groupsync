@@ -101,9 +101,9 @@ func (g *GitHub) GroupMembers(group string) ([]User, error) {
 	return result, nil
 }
 
-func (g *GitHub) getSvcIdentity(identities map[string]Identity) (Identity, error) {
-	_, ok := identities["ldap"]
-	if ok {
+func (g *GitHub) acquireIdentity(user *User) (Identity, error) {
+	_, err := user.getIdentity("ldap")
+	if err == nil {
 		return NoneIdentity{}, nil
 	}
 

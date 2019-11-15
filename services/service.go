@@ -9,7 +9,7 @@ import (
 type Service interface {
 	// Get the members of group `group` as a slice of User instances.
 	GroupMembers(group string) ([]User, error)
-	getSvcIdentity(identities map[string]Identity) (Identity, error)
+	acquireIdentity(user *User) (Identity, error)
 }
 
 func SvcFromString(name string) (Service, error) {
@@ -24,4 +24,8 @@ func SvcFromString(name string) (Service, error) {
 			name,
 		)
 	}
+}
+
+func diff(source Service, target Service) {
+
 }

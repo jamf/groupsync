@@ -3,6 +3,7 @@ package services
 import (
 	"bytes"
 	"fmt"
+	"reflect"
 )
 
 // User is used to identify users by their unique data acquired from
@@ -48,6 +49,14 @@ func IdentityExists(i Identity) bool {
 	return !ok
 }
 
+func identityEqual(i1, i2 Identity) bool {
+	if reflect.TypeOf(i1) == reflect.TypeOf(i2) {
+		// This should never happen!
+		panic("comparing identities of different types")
+	}
+	return i1.uniqueID() == i2.uniqueID()
+}
+
 func (u *User) getIdentity(svc_name string) (Identity, error) {
 	// Check if the identity is already stored in this instance of User
 	id, ok := u.identities[svc_name]
@@ -61,7 +70,7 @@ func (u *User) getIdentity(svc_name string) (Identity, error) {
 		return nil, err
 	}
 
-	id, err = svc.getSvcIdentity(u.identities)
+	id, err = svc.acquireIdentity(u)
 	if err != nil {
 		return nil, err
 	}

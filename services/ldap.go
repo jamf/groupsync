@@ -172,9 +172,9 @@ func (l *LDAP) GroupMembers(group string) ([]User, error) {
 	return members, nil
 }
 
-func (l *LDAP) getSvcIdentity(identities map[string]Identity) (Identity, error) {
-	_, ok := identities["github"]
-	if ok {
+func (l *LDAP) acquireIdentity(user *User) (Identity, error) {
+	_, err := user.getIdentity("github")
+	if err == nil {
 		// unimplemented
 
 		return nil, nil

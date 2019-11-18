@@ -69,17 +69,17 @@ func assertDiff(expectedRem, rem, expectedAdd, add []User) {
 	expectedAdd = sanitize(expectedAdd)
 	add = sanitize(add)
 
-	if reflect.DeepEqual(expectedRem, rem[:]) &&
-		reflect.DeepEqual(expectedAdd[:], add[:]) {
+	if reflect.DeepEqual(expectedRem, rem) &&
+		reflect.DeepEqual(expectedAdd, add) {
 		return
 	}
 
 	fmt.Printf(
 		"Expected rem: %+v\nActual rem: %+v\nExpected add: %+v\nActual add: %+v\n",
-		expectedRem[:],
-		rem[:],
-		expectedAdd[:],
-		add[:],
+		expectedRem,
+		rem,
+		expectedAdd,
+		add,
 	)
 
 	panic("expected and actual rem/add slices didn't match")

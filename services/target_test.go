@@ -33,18 +33,7 @@ func TestDiffWithOverlap(t *testing.T) {
 
 	rem, add := Diff(srcGrp, tarGrp, "mockservice")
 
-	if len(rem) != len(expectedRem) {
-		panic(fmt.Sprintf("The users-to-remove slice has the wrong length: %v", len(rem)))
-	}
-
-	if len(add) != len(expectedAdd) {
-		panic(fmt.Sprintf("The users-to-add slice has the wrong length: %v", len(add)))
-	}
-
-	if !reflect.DeepEqual(expectedRem, rem) ||
-		!reflect.DeepEqual(expectedAdd, add) {
-		panic("!")
-	}
+	assertDiff(expectedRem, rem, expectedAdd, add)
 }
 
 func TestDiffIdenticalGroups(t *testing.T) {
@@ -57,13 +46,7 @@ func TestDiffIdenticalGroups(t *testing.T) {
 
 	rem, add := Diff(srcGrp, tarGrp, "mockservice")
 
-	if len(rem) != len(expectedRem) {
-		panic(fmt.Sprintf("The users-to-remove slice has the wrong length: %v", len(rem)))
-	}
-
-	if len(add) != len(expectedAdd) {
-		panic(fmt.Sprintf("The users-to-add slice has the wrong length: %v", len(add)))
-	}
+	assertDiff(expectedRem, rem, expectedAdd, add)
 }
 
 // Helpers
@@ -78,4 +61,37 @@ func buildMockUsers(start, end uint32) []User {
 	}
 
 	return result
+}
+
+func assertDiff(expectedRem, rem, expectedAdd, add []User) {
+	expectedRem = sanitize(expectedRem)
+	rem = sanitize(rem)
+	expectedAdd = sanitize(expectedAdd)
+	add = sanitize(add)
+
+	if reflect.DeepEqual(expectedRem, rem[:]) &&
+		reflect.DeepEqual(expectedAdd[:], add[:]) {
+		return
+	}
+
+	fmt.Printf(
+		"Expected rem: %+v\nActual rem: %+v\nExpected add: %+v\nActual add: %+v\n",
+		expectedRem[:],
+		rem[:],
+		expectedAdd[:],
+		add[:],
+	)
+
+	panic("expected and actual rem/add slices didn't match")
+}
+
+func sanitize(u []User) []User {
+	// because the fact slices can be either nil or empty in Golang and they
+	// behave differently in only some fringe circumstances is absolutely awful
+
+	if u == nil {
+		return make([]User, 0)
+	}
+
+	return u
 }

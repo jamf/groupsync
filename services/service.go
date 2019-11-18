@@ -18,14 +18,12 @@ func SvcFromString(name string) (Service, error) {
 		return NewLDAP(), nil
 	case "github":
 		return NewGitHub(), nil
+	case "mockservice":
+		return newMockService(), nil
 	default:
 		return nil, fmt.Errorf(
 			"no service %s defined",
 			name,
 		)
 	}
-}
-
-func diff(source Service, target Service) {
-
 }

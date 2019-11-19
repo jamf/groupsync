@@ -9,8 +9,9 @@ import (
 )
 
 type GitHub struct {
-	client *githubv4.Client
-	cfg    GitHubConfig
+	client        *githubv4.Client
+	mappingsCache map[string]GitHubSAMLMapping
+	cfg           GitHubConfig
 }
 
 type GitHubConfig struct {
@@ -131,9 +132,20 @@ func (g *GitHub) initClient() {
 	}
 }
 
-// getAllGitHubMappings fetches all the mappings of GitHub identities to SAML
-// identities within the given org.
 func (g *GitHub) getAllGitHubMappings() (map[string]GitHubSAMLMapping, error) {
+	if g.mappingsCache == nil {
+		mappings, err := g.acquireAllGitHubMappings()
+		if err != nil {
+			return nil, err
+		}
+		g.mappingsCache = mappings
+	}
+	return g.mappingsCache, nil
+}
+
+// acquireAllGitHubMappings fetches all the mappings of GitHub identities to SAML
+// identities within the given org.
+func (g *GitHub) acquireAllGitHubMappings() (map[string]GitHubSAMLMapping, error) {
 	g.initClient()
 
 	result := make(map[string]GitHubSAMLMapping)

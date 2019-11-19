@@ -17,10 +17,6 @@ func (t MockService) RemoveMembers(users []User) error {
 	return nil
 }
 
-func (t MockService) acquireIdentity(user *User) (Identity, error) {
-	return nil, fmt.Errorf("unimplemented")
-}
-
 func (t MockService) GroupMembers(group string) ([]User, error) {
 	return nil, fmt.Errorf("unimplemented")
 }

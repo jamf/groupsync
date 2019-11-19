@@ -9,7 +9,6 @@ import (
 type Service interface {
 	// Get the members of group `group` as a slice of User instances.
 	GroupMembers(group string) ([]User, error)
-	acquireIdentity(user *User) (Identity, error)
 }
 
 func SvcFromString(name string) (Service, error) {

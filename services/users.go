@@ -65,7 +65,7 @@ func (u *User) getIdentity(svc_name string) (Identity, error) {
 	}
 
 	// Attempt to acquire the identity
-	svc, err := SvcFromString(svc_name)
+	svc, err := TargetFromString(svc_name)
 	if err != nil {
 		return nil, err
 	}

@@ -172,17 +172,6 @@ func (l *LDAP) GroupMembers(group string) ([]User, error) {
 	return members, nil
 }
 
-func (l *LDAP) acquireIdentity(user *User) (Identity, error) {
-	_, err := user.getIdentity("github")
-	if err == nil {
-		// unimplemented
-
-		return nil, nil
-	}
-
-	return nil, fmt.Errorf("couldn't get the GitHub ID for user")
-}
-
 // Returns the DN of an LDAP group or an error if not found.
 func (l *LDAP) findGroup(g string) (string, error) {
 	if l.conn == nil {

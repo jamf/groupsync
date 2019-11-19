@@ -52,7 +52,7 @@ func NewGitHub() *GitHub {
 	}
 }
 
-// Implement Service for GitHub
+// Implement Service for GitHub.
 
 func (g *GitHub) GroupMembers(group string) ([]User, error) {
 	g.initClient()
@@ -101,6 +101,8 @@ func (g *GitHub) GroupMembers(group string) ([]User, error) {
 	return result, nil
 }
 
+// Implement Target for GitHub.
+
 func (g *GitHub) acquireIdentity(user *User) (Identity, error) {
 	_, err := user.getIdentity("ldap")
 	if err == nil {
@@ -108,6 +110,14 @@ func (g *GitHub) acquireIdentity(user *User) (Identity, error) {
 	}
 
 	return nil, fmt.Errorf("couldn't get the GitHub ID for user\n")
+}
+
+func (g GitHub) AddMembers(users []User) error {
+	return fmt.Errorf("not implemented")
+}
+
+func (g GitHub) RemoveMembers(users []User) error {
+	return fmt.Errorf("not implemented")
 }
 
 func (g *GitHub) initClient() {

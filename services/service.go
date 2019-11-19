@@ -43,12 +43,11 @@ func Diff(srcGrp, tarGrp []User, tar string) (rem, add []User, err error) {
 	for _, u := range srcGrp {
 		i, e := u.getIdentity(tar)
 		if e != nil {
-			err = fmt.Errorf(
-				"error acquiring identity for a user\nuser: %s\nerror: %s",
-				u,
-				e,
-			)
-			return
+			// fmt.Printf(
+			// 	"warning: error acquiring identity for a user\nuser: %s\nerror: %s",
+			// 	u,
+			// 	e,
+			// )
 		} else if IdentityExists(i) {
 			srcMap[i.uniqueID()] = u
 		}
@@ -57,12 +56,11 @@ func Diff(srcGrp, tarGrp []User, tar string) (rem, add []User, err error) {
 	for _, u := range tarGrp {
 		i, e := u.getIdentity(tar)
 		if e != nil {
-			err = fmt.Errorf(
-				"error acquiring identity for a user\nuser: %s\nerror: %s",
-				u,
-				e,
-			)
-			return
+			// fmt.Printf(
+			// 	"warning: error acquiring identity for a user\nuser: %s\nerror: %s",
+			// 	u,
+			// 	e,
+			// )
 		} else if IdentityExists(i) {
 			tarMap[i.uniqueID()] = u
 		}

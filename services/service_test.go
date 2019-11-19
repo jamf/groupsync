@@ -31,7 +31,7 @@ func TestDiffWithOverlap(t *testing.T) {
 		srcGrp[0],
 	}
 
-	rem, add := Diff(srcGrp, tarGrp, "mockservice")
+	rem, add, _ := Diff(srcGrp, tarGrp, "mockservice")
 
 	assertDiff(expectedRem, rem, expectedAdd, add)
 }
@@ -44,7 +44,7 @@ func TestDiffIdenticalGroups(t *testing.T) {
 
 	expectedAdd := []User{}
 
-	rem, add := Diff(srcGrp, tarGrp, "mockservice")
+	rem, add, _ := Diff(srcGrp, tarGrp, "mockservice")
 
 	assertDiff(expectedRem, rem, expectedAdd, add)
 }

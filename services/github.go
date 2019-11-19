@@ -112,12 +112,16 @@ func (g *GitHub) acquireIdentity(user *User) (Identity, error) {
 			panic("couldn't acquire SAML user data from GitHub")
 		}
 		mapping, ok := mappings[ldapIdentity.uniqueID()]
-		if ok {
-			return GitHubIdentity{
-				ID:    mapping.User.ID,
-				Login: mapping.User.Login,
-			}, nil
+		if !ok {
+			return nil, fmt.Errorf(
+				"no github SAML mapping found for user:\n%v\n",
+				user,
+			)
 		}
+		return GitHubIdentity{
+			ID:    mapping.User.ID,
+			Login: mapping.User.Login,
+		}, nil
 	}
 
 	return nil, fmt.Errorf(
@@ -216,7 +220,7 @@ func (g *GitHub) acquireAllGitHubMappings() (map[string]GitHubSAMLMapping, error
 
 	for _, e := range firstQuery.Viewer.Organization.
 		SamlIdentityProvider.ExternalIdentities.Edges {
-		result[e.Node.User.ID] = e.Node
+		result[e.Node.SamlIdentity.NameID] = e.Node
 	}
 
 	hasNextPage := firstQuery.Viewer.Organization.SamlIdentityProvider.

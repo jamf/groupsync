@@ -30,7 +30,7 @@ func SvcFromString(name string) (Service, error) {
 	}
 }
 
-func Diff(srcGrp, tarGrp []User, tar string) (rem, add []User) {
+func Diff(srcGrp, tarGrp []User, tar string) (rem, add []User, err error) {
 	// Build hashmaps of identities for faster lookup.
 	// This approach also takes care of duplicates for free.
 	srcMap := make(map[string]User)
@@ -41,26 +41,28 @@ func Diff(srcGrp, tarGrp []User, tar string) (rem, add []User) {
 	}
 
 	for _, u := range srcGrp {
-		i, err := u.getIdentity(tar)
-		if err != nil {
-			fmt.Errorf(
+		i, e := u.getIdentity(tar)
+		if e != nil {
+			err = fmt.Errorf(
 				"error acquiring identity for a user\nuser: %s\nerror: %s",
 				u,
-				err,
+				e,
 			)
+			return
 		} else if IdentityExists(i) {
 			srcMap[i.uniqueID()] = u
 		}
 	}
 
 	for _, u := range tarGrp {
-		i, err := u.getIdentity(tar)
-		if err != nil {
-			fmt.Errorf(
+		i, e := u.getIdentity(tar)
+		if e != nil {
+			err = fmt.Errorf(
 				"error acquiring identity for a user\nuser: %s\nerror: %s",
 				u,
-				err,
+				e,
 			)
+			return
 		} else if IdentityExists(i) {
 			tarMap[i.uniqueID()] = u
 		}

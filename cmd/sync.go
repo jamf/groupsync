@@ -90,7 +90,7 @@ func newMapping(src []groupIdent, tar groupIdent) mapping {
 	}
 }
 
-func (m mapping) diff() ([]services.User, []services.User) {
+func (m mapping) diff() ([]services.User, []services.User, error) {
 	var flattenedSrc []services.User
 
 	for _, src := range m.src {
@@ -139,7 +139,10 @@ var syncCmd = &cobra.Command{
 		}
 
 		for _, mapping := range mappings {
-			rem, add := mapping.diff()
+			rem, add, err := mapping.diff()
+			if err != nil {
+				panic(err)
+			}
 
 			var b bytes.Buffer
 
@@ -185,7 +188,7 @@ var syncCmd = &cobra.Command{
 func parseCLIMapping(args []string) (mapping, error) {
 	if len(args) < 2 {
 		return mapping{}, fmt.Errorf(
-			"sync requires at least one source and a target"
+			"sync requires at least one source and a target",
 		)
 	}
 

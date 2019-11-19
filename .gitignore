@@ -6,6 +6,8 @@ services/github_test.go
 
 ### groupsync configuration ###
 groupsync.toml
+groupsync.yaml
+mappings.yaml
 
 ### Go ###
 # Binaries for programs and plugins

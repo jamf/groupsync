@@ -15,7 +15,7 @@ type Target interface {
 func TargetFromString(name string) (Target, error) {
 	switch name {
 	case "github":
-		return NewGitHub(), nil
+		return githubSvc, nil
 	default:
 		return nil, fmt.Errorf(
 			"no target %s defined",

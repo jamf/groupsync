@@ -11,12 +11,15 @@ type Service interface {
 	GroupMembers(group string) ([]User, error)
 }
 
+var ldapSvc = NewLDAP()
+var githubSvc = NewGitHub()
+
 func SvcFromString(name string) (Service, error) {
 	switch name {
 	case "ldap":
-		return NewLDAP(), nil
+		return ldapSvc, nil
 	case "github":
-		return NewGitHub(), nil
+		return githubSvc, nil
 	case "mockservice":
 		return newMockService(), nil
 	default:

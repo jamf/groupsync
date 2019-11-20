@@ -4,12 +4,14 @@ import (
 	"context"
 	"fmt"
 
+	githubv3 "github.com/google/go-github/v28/github"
 	"github.com/shurcooL/githubv4"
 	"golang.org/x/oauth2"
 )
 
 type GitHub struct {
-	client        *githubv4.Client
+	v3client      *githubv3.Client
+	v4client      *githubv4.Client
 	mappingsCache map[string]GitHubSAMLMapping
 	cfg           GitHubConfig
 }
@@ -78,7 +80,7 @@ func (g *GitHub) GroupMembers(group string) ([]User, error) {
 		"grp": githubv4.String(group),
 	}
 
-	err := g.client.Query(
+	err := g.v4client.Query(
 		context.Background(),
 		&membersQuery,
 		vars,
@@ -139,13 +141,17 @@ func (g GitHub) RemoveMembers(users []User) error {
 }
 
 func (g *GitHub) initClient() {
-	if g.client == nil {
+	if g.v4client == nil && g.v3client == nil {
 		src := oauth2.StaticTokenSource(
 			&oauth2.Token{AccessToken: g.cfg.Token},
 		)
 		httpClient := oauth2.NewClient(context.Background(), src)
 
-		g.client = githubv4.NewClient(httpClient)
+		g.v4client = githubv4.NewClient(httpClient)
+		g.v3client = githubv3.NewClient(httpClient)
+	} else if g.v4client == nil || g.v3client == nil {
+		panic("only one of the v3 and v4 github clients is defined; " +
+			"this shouldn't happen")
 	}
 }
 
@@ -209,7 +215,7 @@ func (g *GitHub) acquireAllGitHubMappings() (map[string]GitHubSAMLMapping, error
 		"org": githubv4.String(g.cfg.Org),
 	}
 
-	err := g.client.Query(
+	err := g.v4client.Query(
 		context.Background(),
 		&firstQuery,
 		vars,
@@ -234,7 +240,7 @@ func (g *GitHub) acquireAllGitHubMappings() (map[string]GitHubSAMLMapping, error
 			"page_cursor": githubv4.String(cursor),
 		}
 
-		err := g.client.Query(
+		err := g.v4client.Query(
 			context.Background(),
 			&nextQuery,
 			vars,

@@ -4,8 +4,8 @@ import "fmt"
 
 // Target represents a service whose group memberships can be mutated.
 type Target interface {
-	AddMembers(users []User) error
-	RemoveMembers(users []User) error
+	AddMembers(team string, users []User) error
+	RemoveMembers(team string, users []User) error
 	acquireIdentity(user *User) (Identity, error)
 
 	// Target implementors should also implement Service.

@@ -132,12 +132,73 @@ func (g *GitHub) acquireIdentity(user *User) (Identity, error) {
 	)
 }
 
-func (g GitHub) AddMembers(users []User) error {
-	return fmt.Errorf("not implemented")
+func (g *GitHub) AddMembers(teamSlug string, users []User) error {
+	g.initClient()
+
+	team, _, err := g.v3client.Teams.GetTeamBySlug(
+		context.Background(),
+		g.cfg.Org,
+		teamSlug,
+	)
+	if err != nil {
+		return err
+	}
+
+	for _, user := range users {
+		identity, err := user.getIdentity("github")
+		if err != nil {
+			return err
+		}
+
+		ghIdentity := identity.(GitHubIdentity)
+
+		_, _, err = g.v3client.Teams.AddTeamMembership(
+			context.Background(),
+			*team.ID,
+			ghIdentity.Login,
+			&githubv3.TeamAddTeamMembershipOptions{
+				Role: "member",
+			},
+		)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
-func (g GitHub) RemoveMembers(users []User) error {
-	return fmt.Errorf("not implemented")
+func (g *GitHub) RemoveMembers(teamSlug string, users []User) error {
+	g.initClient()
+
+	team, _, err := g.v3client.Teams.GetTeamBySlug(
+		context.Background(),
+		g.cfg.Org,
+		teamSlug,
+	)
+	if err != nil {
+		return err
+	}
+
+	for _, user := range users {
+		identity, err := user.getIdentity("github")
+		if err != nil {
+			return err
+		}
+
+		ghIdentity := identity.(GitHubIdentity)
+
+		_, err = g.v3client.Teams.RemoveTeamMembership(
+			context.Background(),
+			*team.ID,
+			ghIdentity.Login,
+		)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func (g *GitHub) initClient() {

@@ -108,11 +108,6 @@ var syncCmd = &cobra.Command{
 	Short: "List the members of a group (or groups)",
 	Long:  `List the members of a group (or groups).`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if !DryRun {
-			// Commit changes
-			panic("sync is not implemented yet except with the dry-run flag")
-		}
-
 		var mappings []mapping
 
 		if MappingFile != "" {
@@ -181,8 +176,36 @@ var syncCmd = &cobra.Command{
 			}
 
 			fmt.Println(b.String())
+
+			if DryRun {
+				fmt.Println("This is a dry run. No changes committed.")
+			} else {
+				err = commitChanges(mapping.tar.svc, mapping.tar.name, add, rem)
+				if err != nil {
+					fmt.Printf("Cannot commit changes!\nCause:%s\n", err)
+				}
+			}
 		}
 	},
+}
+
+func commitChanges(tar, team string, add, rem []services.User) error {
+	svc, err := services.TargetFromString(tar)
+	if err != nil {
+		return err
+	}
+
+	err = svc.AddMembers(team, add)
+	if err != nil {
+		return err
+	}
+
+	err = svc.RemoveMembers(team, rem)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func parseCLIMapping(args []string) (mapping, error) {

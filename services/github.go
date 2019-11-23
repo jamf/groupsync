@@ -147,12 +147,13 @@ func (g *GitHub) AddMembers(teamSlug string, users []User) error {
 	for _, user := range users {
 		identity, err := user.getIdentity("github")
 		if err != nil {
-			return err
+			fmt.Println(err)
+			continue
 		}
 
 		ghIdentity := identity.(GitHubIdentity)
 
-		_, _, err = g.v3client.Teams.AddTeamMembership(
+		membership, _, err := g.v3client.Teams.AddTeamMembership(
 			context.Background(),
 			*team.ID,
 			ghIdentity.Login,
@@ -161,8 +162,9 @@ func (g *GitHub) AddMembers(teamSlug string, users []User) error {
 			},
 		)
 		if err != nil {
-			return err
+			fmt.Println(err)
 		}
+		fmt.Println(membership)
 	}
 
 	return nil
@@ -183,7 +185,8 @@ func (g *GitHub) RemoveMembers(teamSlug string, users []User) error {
 	for _, user := range users {
 		identity, err := user.getIdentity("github")
 		if err != nil {
-			return err
+			fmt.Println(err)
+			continue
 		}
 
 		ghIdentity := identity.(GitHubIdentity)
@@ -194,7 +197,7 @@ func (g *GitHub) RemoveMembers(teamSlug string, users []User) error {
 			ghIdentity.Login,
 		)
 		if err != nil {
-			return err
+			fmt.Println(err)
 		}
 	}
 

@@ -11,8 +11,8 @@ type Service interface {
 	GroupMembers(group string) ([]User, error)
 }
 
-var ldapSvc = NewLDAP()
-var githubSvc = NewGitHub()
+var ldapSvc *LDAP
+var githubSvc *GitHub
 
 func SvcFromString(name string) (Service, error) {
 	switch name {

@@ -13,25 +13,50 @@ type config struct {
 
 var cfg *config = nil
 
+func initConfig() error {
+	if cfg != nil {
+		return newConfigError(
+			fmt.Errorf("config already initialized"),
+		)
+	}
+
+	viper.SetConfigName("groupsync")
+	viper.AddConfigPath("/etc/groupsync/")
+	viper.AddConfigPath("$HOME/.groupsync/")
+	viper.AddConfigPath(".")
+	err := viper.ReadInConfig()
+	if err != nil {
+		return newConfigError(err)
+	}
+
+	var c config
+	err = viper.Unmarshal(&c)
+	if err != nil {
+		return newConfigError(err)
+	}
+
+	cfg = &c
+	return nil
+}
+
 func getConfig() config {
 	if cfg == nil {
-		viper.SetConfigName("groupsync")
-		viper.AddConfigPath("/etc/groupsync/")
-		viper.AddConfigPath("$HOME/.groupsync/")
-		viper.AddConfigPath(".")
-		err := viper.ReadInConfig()
-		if err != nil {
-			panic(fmt.Errorf("fatal error reading config file: %s", err))
-		}
-
-		var c config
-		err = viper.Unmarshal(&c)
-		if err != nil {
-			panic(fmt.Errorf("fatal error unmarshalling config: %s", err))
-		}
-
-		cfg = &c
-		return c
+		panic("config not initialized - this shouldn't happen")
 	}
+
 	return *cfg
+}
+
+type ConfigError struct {
+	originalError error
+}
+
+func newConfigError(original error) ConfigError {
+	return ConfigError{
+		originalError: original,
+	}
+}
+
+func (e ConfigError) Error() string {
+	return fmt.Sprintf("Error initializing config: %v", e.originalError)
 }

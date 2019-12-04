@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/google/logger"
 	"github.com/spf13/cobra"
 
 	"github.com/jamf/groupsync/services"
@@ -26,7 +27,7 @@ var lsCmd = &cobra.Command{
 		for _, grp := range args[1:] {
 			members, err := svc.GroupMembers(grp)
 			if err != nil {
-				fmt.Printf(
+				logger.Errorf(
 					"Error looking up members of group %s!\nError: %s\n",
 					grp,
 					err,

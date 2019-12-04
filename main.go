@@ -7,6 +7,7 @@ import (
 
 	"github.com/google/logger"
 	"github.com/jamf/groupsync/cmd"
+	"github.com/jamf/groupsync/services"
 	"github.com/logrusorgru/aurora"
 )
 
@@ -15,10 +16,14 @@ func main() {
 	logger.SetFlags(log.Lshortfile)
 
 	if debug {
-		fmt.Print(
+		fmt.Println(
 			aurora.Red("You're using a dev build of groupsync. "),
 		)
-		fmt.Println("Verbose logging enabled.")
+	}
+
+	err := services.Init()
+	if err != nil {
+		logger.Fatal(err)
 	}
 
 	cmd.Execute()

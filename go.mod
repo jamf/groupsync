@@ -10,6 +10,7 @@ require (
 	github.com/gogo/protobuf v1.3.1 // indirect
 	github.com/google/go-github v17.0.0+incompatible
 	github.com/google/go-github/v28 v28.1.1
+	github.com/google/logger v1.0.1
 	github.com/logrusorgru/aurora v0.0.0-20191116043053-66b7ad493a23
 	github.com/magiconair/properties v1.8.1 // indirect
 	github.com/opencontainers/go-digest v1.0.0-rc1 // indirect

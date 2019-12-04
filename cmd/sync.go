@@ -183,7 +183,7 @@ var syncCmd = &cobra.Command{
 			} else {
 				err = commitChanges(mapping.tar.svc, mapping.tar.name, add, rem)
 				if err != nil {
-					fmt.Printf("Cannot commit changes!\nCause:%s\n", err)
+					logger.Fatalf("Cannot commit changes! Cause: %s\n", err)
 				}
 			}
 		}

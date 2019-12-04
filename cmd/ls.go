@@ -21,7 +21,7 @@ var lsCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		svc, err := services.SvcFromString(args[0])
 		if err != nil {
-			panic(err)
+			logger.Fatal(err)
 		}
 
 		for _, grp := range args[1:] {

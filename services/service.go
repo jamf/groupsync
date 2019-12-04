@@ -25,11 +25,22 @@ func SvcFromString(name string) (Service, error) {
 	case "mockservice":
 		return newMockService(), nil
 	default:
-		return nil, fmt.Errorf(
-			"no service %s defined",
-			name,
-		)
+		return nil, newServiceNotDefined(name)
 	}
+}
+
+type ServiceNotDefined struct {
+	serviceName string
+}
+
+func newServiceNotDefined(serviceName string) ServiceNotDefined {
+	return ServiceNotDefined{
+		serviceName: serviceName,
+	}
+}
+
+func (e ServiceNotDefined) Error() string {
+	return fmt.Sprintf("service `%s` not defined", e.serviceName)
 }
 
 func Diff(srcGrp, tarGrp []User, tar string) (rem, add []User, err error) {

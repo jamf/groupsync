@@ -23,3 +23,17 @@ func TargetFromString(name string) (Target, error) {
 		)
 	}
 }
+
+type TargetNotDefined struct {
+	serviceName string
+}
+
+func newTargetNotDefined(serviceName string) TargetNotDefined {
+	return TargetNotDefined{
+		serviceName: serviceName,
+	}
+}
+
+func (e TargetNotDefined) Error() string {
+	return fmt.Sprintf("target `%s` not defined", e.serviceName)
+}

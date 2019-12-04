@@ -13,7 +13,14 @@ import (
 
 func main() {
 	defer logger.Init("groupsyncLogger", debug, true, ioutil.Discard).Close()
-	logger.SetFlags(log.Lshortfile)
+
+	// The debug format of logs includes the source file name. The release one
+	// doesn't.
+	if debug {
+		logger.SetFlags(log.Lshortfile)
+	} else {
+		logger.SetFlags(log.LUTC)
+	}
 
 	if debug {
 		fmt.Println(

@@ -2,6 +2,8 @@ package services
 
 import (
 	"fmt"
+
+	"github.com/google/logger"
 )
 
 // Service represents a service that holds information about groups and
@@ -37,17 +39,18 @@ func Diff(srcGrp, tarGrp []User, tar string) (rem, add []User, err error) {
 	tarMap := make(map[string]User)
 
 	if len(srcGrp) < 1 {
-		panic("sanity check failed: the source group is empty")
+		return nil, nil, newSourceGroupEmptyError()
 	}
 
 	for _, u := range srcGrp {
 		i, e := u.getIdentity(tar)
 		if e != nil {
-			// fmt.Printf(
-			// 	"warning: error acquiring identity for a user\nuser: %s\nerror: %s",
-			// 	u,
-			// 	e,
-			// )
+			logger.Warningf(
+				"error acquiring identity for a user - skipping\n"+
+					"user: %v\nerror: %v\n",
+				u,
+				e,
+			)
 		} else if IdentityExists(i) {
 			srcMap[i.uniqueID()] = u
 		}
@@ -56,11 +59,12 @@ func Diff(srcGrp, tarGrp []User, tar string) (rem, add []User, err error) {
 	for _, u := range tarGrp {
 		i, e := u.getIdentity(tar)
 		if e != nil {
-			// fmt.Printf(
-			// 	"warning: error acquiring identity for a user\nuser: %s\nerror: %s",
-			// 	u,
-			// 	e,
-			// )
+			logger.Warningf(
+				"error acquiring identity for a user - skipping\n"+
+					"user: %v\nerror: %v\n",
+				u,
+				e,
+			)
 		} else if IdentityExists(i) {
 			tarMap[i.uniqueID()] = u
 		}
@@ -86,6 +90,17 @@ func Diff(srcGrp, tarGrp []User, tar string) (rem, add []User, err error) {
 	}
 
 	return
+}
+
+type SourceGroupEmptyError struct {
+}
+
+func newSourceGroupEmptyError() SourceGroupEmptyError {
+	return SourceGroupEmptyError{}
+}
+
+func (e SourceGroupEmptyError) Error() string {
+	return "sanity check failed: the source group is empty"
 }
 
 func createIDMap(ids []Identity) map[string]Identity {

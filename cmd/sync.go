@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"strings"
 
+	"github.com/google/logger"
 	"github.com/spf13/cobra"
 
 	"github.com/jamf/groupsync/services"
@@ -55,7 +56,7 @@ func (y YAMLMapping) intoMapping() mapping {
 	for _, yamlSrc := range y.Sources {
 		src, err := yamlSrc.intoGroupIdent()
 		if err != nil {
-			panic(err)
+			logger.Fatal(err)
 		}
 
 		sources = append(sources, src)
@@ -63,7 +64,7 @@ func (y YAMLMapping) intoMapping() mapping {
 
 	target, err := y.Target.intoGroupIdent()
 	if err != nil {
-		panic(err)
+		logger.Fatal(err)
 	}
 
 	return mapping{
@@ -113,7 +114,7 @@ var syncCmd = &cobra.Command{
 		if MappingFile != "" {
 			data, err := ioutil.ReadFile(MappingFile)
 			if err != nil {
-				panic(err)
+				logger.Fatal(err)
 			}
 
 			var mappingData []YAMLMapping
@@ -127,7 +128,7 @@ var syncCmd = &cobra.Command{
 		} else {
 			mapping, err := parseCLIMapping(args)
 			if err != nil {
-				panic(err)
+				logger.Fatal(err)
 			}
 
 			mappings = append(mappings, mapping)
@@ -136,7 +137,7 @@ var syncCmd = &cobra.Command{
 		for _, mapping := range mappings {
 			rem, add, err := mapping.diff()
 			if err != nil {
-				panic(err)
+				logger.Fatal(err)
 			}
 
 			var b bytes.Buffer

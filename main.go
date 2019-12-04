@@ -17,7 +17,7 @@ func main() {
 
 	if debug {
 		fmt.Println(
-			aurora.Red("You're using a dev build of groupsync. "),
+			aurora.Red("You're using a dev build of groupsync."),
 		)
 	}
 

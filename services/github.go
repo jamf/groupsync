@@ -111,7 +111,10 @@ func (g *GitHub) acquireIdentity(user *User) (Identity, error) {
 	if ok {
 		mappings, err := g.getAllGitHubMappings()
 		if err != nil {
-			panic("couldn't acquire SAML user data from GitHub")
+			return nil, newFatalError(
+				"acquiring all SAML mappings",
+				err,
+			)
 		}
 		mapping, ok := mappings[ldapIdentity.uniqueID()]
 		if !ok {

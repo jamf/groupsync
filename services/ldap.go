@@ -61,7 +61,7 @@ func NewLDAP() *LDAP {
 	}
 }
 
-func (l *LDAPConfig) connect() *ldap.Conn {
+func (l *LDAPConfig) connect() (*ldap.Conn, error) {
 	var c *ldap.Conn
 	var err error
 
@@ -79,23 +79,26 @@ func (l *LDAPConfig) connect() *ldap.Conn {
 			fmt.Sprintf("%s:%d", l.Server, l.Port),
 		)
 	}
-
 	if err != nil {
-		panic(
-			fmt.Sprintf("Error when connecting!\n%s", err),
-		)
+		return nil, err
 	}
 
 	err = c.Bind(l.BindUser, l.BindPassword)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
-	return c
+	return c, nil
 }
 
-func (l *LDAP) connect() {
-	l.conn = l.cfg.connect()
+func (l *LDAP) connect() error {
+	conn, err := l.cfg.connect()
+	if err != nil {
+		return err
+	}
+
+	l.conn = conn
+	return nil
 }
 
 // GroupMembers returns the members of group `group` as a slice of User
@@ -152,11 +155,11 @@ func (l *LDAP) GroupMembers(group string) ([]User, error) {
 		if l.cfg.UserIDAttribute != "" {
 			member.id = e.GetAttributeValue(l.cfg.UserIDAttribute)
 			if member.id == "" {
-				panic(fmt.Sprintf(
+				return nil, fmt.Errorf(
 					"Failed to get user ID (%s) for %s",
 					l.cfg.UserIDAttribute,
 					e.DN,
-				))
+				)
 			}
 		}
 

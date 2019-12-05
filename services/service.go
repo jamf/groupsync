@@ -56,12 +56,18 @@ func Diff(srcGrp, tarGrp []User, tar string) (rem, add []User, err error) {
 	for _, u := range srcGrp {
 		i, e := u.getIdentity(tar)
 		if e != nil {
-			logger.Warningf(
-				"error acquiring identity for a user - skipping\n"+
-					"user: %v\nerror: %v\n",
-				u,
-				e,
-			)
+			switch e.(type) {
+			case FatalError:
+				return nil, nil, e
+			default:
+				logger.Warningf(
+					"error acquiring identity for a user - skipping\n"+
+						"user: %v\nerror: %v\n",
+					u,
+					e,
+				)
+			}
+
 		} else if IdentityExists(i) {
 			srcMap[i.uniqueID()] = u
 		}
@@ -122,4 +128,29 @@ func createIDMap(ids []Identity) map[string]Identity {
 	}
 
 	return result
+}
+
+// A wrapper used to let upper layers know the error isn't recoverable.
+type FatalError struct {
+	source  error
+	context string
+}
+
+func newFatalError(context string, source error) FatalError {
+	return FatalError{
+		source:  source,
+		context: context,
+	}
+}
+
+func (e FatalError) Error() string {
+	if e.context == "" {
+		return e.source.Error()
+	}
+
+	return fmt.Sprintf(
+		"error when %v: %v",
+		e.context,
+		e.source,
+	)
 }

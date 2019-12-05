@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	githubv3 "github.com/google/go-github/v28/github"
+	"github.com/google/logger"
 	"github.com/shurcooL/githubv4"
 	"golang.org/x/oauth2"
 )
@@ -150,8 +151,13 @@ func (g *GitHub) AddMembers(teamSlug string, users []User) error {
 	for _, user := range users {
 		identity, err := user.getIdentity("github")
 		if err != nil {
-			fmt.Println(err)
-			continue
+			switch err.(type) {
+			case FatalError:
+				return err
+			default:
+				logger.Error(err)
+				continue
+			}
 		}
 
 		ghIdentity := identity.(GitHubIdentity)
@@ -165,7 +171,7 @@ func (g *GitHub) AddMembers(teamSlug string, users []User) error {
 			},
 		)
 		if err != nil {
-			fmt.Println(err)
+			logger.Error(err)
 		}
 		fmt.Println(membership)
 	}
@@ -188,8 +194,13 @@ func (g *GitHub) RemoveMembers(teamSlug string, users []User) error {
 	for _, user := range users {
 		identity, err := user.getIdentity("github")
 		if err != nil {
-			fmt.Println(err)
-			continue
+			switch err.(type) {
+			case FatalError:
+				return err
+			default:
+				logger.Error(err)
+				continue
+			}
 		}
 
 		ghIdentity := identity.(GitHubIdentity)
@@ -200,7 +211,7 @@ func (g *GitHub) RemoveMembers(teamSlug string, users []User) error {
 			ghIdentity.Login,
 		)
 		if err != nil {
-			fmt.Println(err)
+			logger.Error(err)
 		}
 	}
 
@@ -238,7 +249,7 @@ func (g *GitHub) getAllGitHubMappings() (map[string]GitHubSAMLMapping, error) {
 func (g *GitHub) acquireAllGitHubMappings() (map[string]GitHubSAMLMapping, error) {
 	g.initClient()
 
-	fmt.Println("Acquiring all GitHub SAML mappings...")
+	logger.Info("Acquiring all GitHub SAML mappings...")
 
 	result := make(map[string]GitHubSAMLMapping)
 

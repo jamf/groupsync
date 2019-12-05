@@ -17,10 +17,7 @@ func TargetFromString(name string) (Target, error) {
 	case "github":
 		return githubSvc, nil
 	default:
-		return nil, fmt.Errorf(
-			"no target %s defined",
-			name,
-		)
+		return nil, newTargetNotDefined(name)
 	}
 }
 

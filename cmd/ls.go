@@ -27,11 +27,19 @@ var lsCmd = &cobra.Command{
 		for _, grp := range args[1:] {
 			members, err := svc.GroupMembers(grp)
 			if err != nil {
-				logger.Errorf(
+				msg := fmt.Sprintf(
 					"Error looking up members of group %s!\nError: %s\n",
 					grp,
 					err,
 				)
+
+				// If we're only looking up one group, exit and return a proper
+				// exit code for its success/failure.
+				if len(args[1:]) == 1 {
+					logger.Fatal(msg)
+				}
+
+				logger.Error(msg)
 				continue
 			}
 			for _, m := range members {

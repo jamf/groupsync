@@ -1,0 +1,17 @@
+- sources:
+  - service: ldap
+    group: my-group
+  target:
+    service: github
+    group: my-team
+
+- sources:
+  - service: ldap
+    group: my-group1
+  - service: ldap
+    group: my-group2
+  - service: github
+    group: my-source-team
+  target:
+    service: github
+    group: my-target-team

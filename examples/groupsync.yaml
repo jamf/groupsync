@@ -1,0 +1,16 @@
+ldap:
+  port: 636
+  server: ldap.my-org.com
+  ssl: true
+  skip_verify: false
+  bind_user: "my-org\\my-user"
+  bind_password: "my-password"
+  user_base_dn: OU=Staff,DC=my-org,DC=com
+  group_base_dn: OU=Groups,DC=my-org,DC=com
+  user_class: person
+  search_attribute: memberOf
+  user_id_attribute: mail
+
+github:
+  token: 28fd0ea63fcd38a8379e746f819a87b8ab82ddd1
+  org: my-org

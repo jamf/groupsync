@@ -24,7 +24,7 @@ var lsCmd = &cobra.Command{
 			logger.Fatal(err)
 		}
 
-		for _, grp := range args[1:] {
+		for i, grp := range args[1:] {
 			members, err := svc.GroupMembers(grp)
 			if err != nil {
 				msg := fmt.Sprintf(
@@ -42,8 +42,13 @@ var lsCmd = &cobra.Command{
 				logger.Error(msg)
 				continue
 			}
+
+			fmt.Printf("- Group `%s`\n", grp)
 			for _, m := range members {
 				fmt.Println(m)
+			}
+			if i < len(args[1:])-1 {
+				fmt.Println("")
 			}
 		}
 	},

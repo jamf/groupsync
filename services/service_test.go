@@ -7,16 +7,15 @@ import (
 )
 
 func TestDiffWithEmptySrc(t *testing.T) {
-	defer func() {
-		if r := recover(); r == nil {
-			t.Errorf("diff should have panicked when given an empty source group")
-		}
-	}()
-
 	srcGrp := buildMockUsers(0, 0)
 	tarGrp := buildMockUsers(0, 3)
 
-	Diff(srcGrp, tarGrp, "mockservice")
+	_, _, err := Diff(srcGrp, tarGrp, "mockservice")
+	switch err.(type) {
+	case SourceGroupEmptyError:
+	default:
+		panic("diff should return a SourceGroupEmptyError on empty source group")
+	}
 }
 
 func TestDiffWithOverlap(t *testing.T) {

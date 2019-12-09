@@ -1,0 +1,29 @@
+name: CI
+on:
+  push:
+    branches-ignore:
+      - master
+jobs:
+
+  build:
+    name: Build
+    runs-on: ubuntu-18.04
+    steps:
+
+    - name: Set up Go 1.13
+      uses: actions/setup-go@v1
+      with:
+        go-version: 1.13
+      id: go
+
+    - name: Check out code into the Go module directory
+      uses: actions/checkout@v1
+      
+    - name: Build
+      run: go build -v .
+
+    - name: Get test OpenLDAP docker image
+      run: docker pull rroemhild/test-openldap
+
+    - name: Test
+      run: go test ./...

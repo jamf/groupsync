@@ -19,5 +19,8 @@ jobs:
     - name: Build
       run: go build -v .
 
+    - name: Get test OpenLDAP docker image
+      run: docker pull rroemhild/test-openldap
+
     - name: Test
       run: go test ./...

@@ -1,10 +1,13 @@
 # groupsync
 *groupsync* is a CLI tool for syncing user group membership info from a directory (like LDAP) to a service like GitHub.
 
+## Status
+Preparing for the first (`0.1.0`) release. Still got to work some kinks out, refactor, test. Use at your own peril!
+
 ## Installation
 Right now *groupsync* is available only from source. The plan is to add binaries and a docker image soon.
 
-You'll need *git* and the [go toolchain](https://golang.org/doc/install).
+You'll need *git* and the *[go toolchain](https://golang.org/doc/install)*.
 
 ```sh
 go get github.com/jamf/groupsync

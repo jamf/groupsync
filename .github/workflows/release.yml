@@ -37,7 +37,7 @@ jobs:
       run: echo ${{ steps.version.outputs.version }}
 
     - name: Upload
-      uses: "marvinpinto/action-automatic-releases@latest"
+      uses: "marvinpinto/action-automatic-releases@v0.2.0"
       with:
         repo_token: "${{ secrets.GITHUB_TOKEN }}"
         prerelease: false

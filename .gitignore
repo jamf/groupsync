@@ -76,5 +76,6 @@ GitHub.sublime-settings
 # End of https://www.gitignore.io/api/go,sublimetext,visualstudiocode
 
 ### Project-specific ###
-settings.yaml
-groupsync
+/settings.yaml
+/groupsync
+/groupsync-*

@@ -12,7 +12,7 @@ import (
 )
 
 func main() {
-	defer logger.Init("groupsyncLogger", debug, true, ioutil.Discard).Close()
+	defer logger.Init("groupsyncLogger", debug, false, ioutil.Discard).Close()
 
 	// The debug format of logs includes the source file name. The release one
 	// doesn't.

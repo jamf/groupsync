@@ -44,4 +44,5 @@ jobs:
         automatic_release_tag: "${{ steps.version.outputs.version }}"
         files: |
           LICENSE
-          groupsync
+          groupsync-darwin
+          groupsync-linux

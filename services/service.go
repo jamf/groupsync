@@ -43,14 +43,26 @@ func (e ServiceNotDefined) Error() string {
 	return fmt.Sprintf("service `%s` not defined", e.serviceName)
 }
 
-func Diff(srcGrp, tarGrp []User, tar string) (rem, add []User, err error) {
+type DiffResult struct {
+	Rem []User
+	Add []User
+}
+
+func newDiffResult(rem, add []User) DiffResult {
+	return DiffResult{
+		Rem: rem,
+		Add: add,
+	}
+}
+
+func Diff(srcGrp, tarGrp []User, tar string) (DiffResult, error) {
 	// Build hashmaps of identities for faster lookup.
 	// This approach also takes care of duplicates for free.
 	srcMap := make(map[string]User)
 	tarMap := make(map[string]User)
 
 	if len(srcGrp) < 1 {
-		return nil, nil, newSourceGroupEmptyError()
+		return DiffResult{}, newSourceGroupEmptyError()
 	}
 
 	for _, u := range srcGrp {
@@ -58,7 +70,7 @@ func Diff(srcGrp, tarGrp []User, tar string) (rem, add []User, err error) {
 		if e != nil {
 			switch e.(type) {
 			case FatalError:
-				return nil, nil, e
+				return DiffResult{}, e
 			default:
 				logger.Warningf(
 					"error acquiring identity for a user - skipping\n"+
@@ -96,6 +108,9 @@ func Diff(srcGrp, tarGrp []User, tar string) (rem, add []User, err error) {
 		}
 	}
 
+	var add []User
+	var rem []User
+
 	// What's left in srcIdentities and tarIdentities is what we have to
 	// add/remove.
 	for _, identity := range srcMap {
@@ -106,7 +121,7 @@ func Diff(srcGrp, tarGrp []User, tar string) (rem, add []User, err error) {
 		rem = append(rem, identity)
 	}
 
-	return
+	return newDiffResult(rem, add), nil
 }
 
 type SourceGroupEmptyError struct {

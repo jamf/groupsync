@@ -15,6 +15,9 @@ type Target interface {
 func TargetFromString(name string) (Target, error) {
 	switch name {
 	case "github":
+		if githubSvc == nil {
+			return nil, fmt.Errorf("services not initialized")
+		}
 		return githubSvc, nil
 	default:
 		return nil, newTargetNotDefined(name)

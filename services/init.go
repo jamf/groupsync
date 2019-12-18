@@ -6,8 +6,5 @@ func Init() error {
 		return err
 	}
 
-	ldapSvc = NewLDAP()
-	githubSvc = NewGitHub()
-
 	return nil
 }

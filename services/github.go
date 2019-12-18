@@ -50,15 +50,15 @@ type GitHubSAMLMapping struct {
 	} `graphql:"samlIdentity"`
 }
 
-func NewGitHub() *GitHub {
+func NewGitHub(cfg GitHubConfig) *GitHub {
 	return &GitHub{
-		cfg: getConfig().GitHub,
+		cfg: cfg,
 	}
 }
 
 // Implement Service for GitHub.
 
-func (g *GitHub) GroupMembers(group string) ([]User, error) {
+func (g GitHub) GroupMembers(group string) ([]User, error) {
 	g.initClient()
 
 	var membersQuery struct {
@@ -117,6 +117,7 @@ func (g *GitHub) acquireIdentity(user *User) (Identity, error) {
 				err,
 			)
 		}
+
 		mapping, ok := mappings[ldapIdentity.uniqueID()]
 		if !ok {
 			return nil, fmt.Errorf(
@@ -124,6 +125,7 @@ func (g *GitHub) acquireIdentity(user *User) (Identity, error) {
 				user,
 			)
 		}
+
 		return GitHubIdentity{
 			ID:    mapping.User.ID,
 			Login: mapping.User.Login,
@@ -136,7 +138,7 @@ func (g *GitHub) acquireIdentity(user *User) (Identity, error) {
 	)
 }
 
-func (g *GitHub) AddMembers(teamSlug string, users []User) error {
+func (g GitHub) AddMembers(teamSlug string, users []User) error {
 	g.initClient()
 
 	team, _, err := g.v3client.Teams.GetTeamBySlug(
@@ -179,7 +181,7 @@ func (g *GitHub) AddMembers(teamSlug string, users []User) error {
 	return nil
 }
 
-func (g *GitHub) RemoveMembers(teamSlug string, users []User) error {
+func (g GitHub) RemoveMembers(teamSlug string, users []User) error {
 	g.initClient()
 
 	team, _, err := g.v3client.Teams.GetTeamBySlug(
@@ -234,6 +236,10 @@ func (g *GitHub) initClient() {
 }
 
 func (g *GitHub) getAllGitHubMappings() (map[string]GitHubSAMLMapping, error) {
+	if g == nil {
+		return nil, fmt.Errorf("nil GitHub object passed to getAllGitHubMappings")
+	}
+
 	if g.mappingsCache == nil {
 		mappings, err := g.acquireAllGitHubMappings()
 		if err != nil {

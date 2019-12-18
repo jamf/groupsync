@@ -55,9 +55,9 @@ type LDAPConfig struct {
 }
 
 // NewLDAP creates a new instance of LDAP with the provided configuration.
-func NewLDAP() *LDAP {
+func NewLDAP(cfg LDAPConfig) *LDAP {
 	return &LDAP{
-		cfg: getConfig().LDAP,
+		cfg: cfg,
 	}
 }
 
@@ -103,7 +103,7 @@ func (l *LDAP) connect() error {
 
 // GroupMembers returns the members of group `group` as a slice of User
 // instances. Implements the Service interface.
-func (l *LDAP) GroupMembers(group string) ([]User, error) {
+func (l LDAP) GroupMembers(group string) ([]User, error) {
 	l.connect()
 	defer l.close()
 

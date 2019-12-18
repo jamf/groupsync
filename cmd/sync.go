@@ -39,21 +39,13 @@ var syncCmd = &cobra.Command{
 	Long:  `List the members of a group (or groups).`,
 	Run: func(cmd *cobra.Command, args []string) {
 		var mappings []services.Mapping
+		var err error
 
 		if MappingFile != "" {
-			data, err := ioutil.ReadFile(MappingFile)
+			mappings, err = parseFileMappings(MappingFile)
 			if err != nil {
 				logger.Fatal(err)
 			}
-
-			var mappingData []services.YAMLMapping
-
-			yaml.Unmarshal(data, &mappingData)
-
-			for _, mapping := range mappingData {
-				mappings = append(mappings, mapping.IntoMapping())
-			}
-
 		} else {
 			mapping, err := parseCLIMapping(args)
 			if err != nil {
@@ -81,6 +73,25 @@ var syncCmd = &cobra.Command{
 			}
 		}
 	},
+}
+
+func parseFileMappings(filename string) ([]services.Mapping, error) {
+	var mappings []services.Mapping
+
+	data, err := ioutil.ReadFile(MappingFile)
+	if err != nil {
+		return nil, err
+	}
+
+	var mappingData []services.YAMLMapping
+
+	yaml.Unmarshal(data, &mappingData)
+
+	for _, mapping := range mappingData {
+		mappings = append(mappings, mapping.IntoMapping())
+	}
+
+	return mappings, nil
 }
 
 func parseCLIMapping(args []string) (services.Mapping, error) {

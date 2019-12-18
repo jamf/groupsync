@@ -55,9 +55,9 @@ type LDAPConfig struct {
 }
 
 // NewLDAP creates a new instance of LDAP with the provided configuration.
-func NewLDAP() *LDAP {
+func NewLDAP(cfg LDAPConfig) *LDAP {
 	return &LDAP{
-		cfg: getConfig().LDAP,
+		cfg: cfg,
 	}
 }
 

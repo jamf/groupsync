@@ -50,9 +50,9 @@ type GitHubSAMLMapping struct {
 	} `graphql:"samlIdentity"`
 }
 
-func NewGitHub() *GitHub {
+func NewGitHub(cfg GitHubConfig) *GitHub {
 	return &GitHub{
-		cfg: getConfig().GitHub,
+		cfg: cfg,
 	}
 }
 

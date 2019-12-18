@@ -13,15 +13,39 @@ type Service interface {
 	GroupMembers(group string) ([]User, error)
 }
 
-var ldapSvc *LDAP
-var githubSvc *GitHub
+var initializedServices map[string]Service = make(map[string]Service)
 
+// SvcFromString produces a Service object with config taken from the global
+// cfg variable.
 func SvcFromString(name string) (Service, error) {
+	// attempt to lookup an already initialized service
+	svc, ok := lookUpServiceInCache(name)
+	if ok {
+		return svc, nil
+	}
+
+	// if service wasn't found in the cache, attempt to initialize it
+	svc, err := newSvcFromName(name)
+	saveSvcInCache(name, svc)
+
+	return svc, err
+}
+
+func saveSvcInCache(name string, svc Service) {
+	initializedServices[name] = svc
+}
+
+func lookUpServiceInCache(name string) (svc Service, ok bool) {
+	svc, ok = initializedServices[name]
+	return
+}
+
+func newSvcFromName(name string) (Service, error) {
 	switch name {
 	case "ldap":
-		return ldapSvc, nil
+		return NewLDAP(cfg.LDAP), nil
 	case "github":
-		return githubSvc, nil
+		return NewGitHub(cfg.GitHub), nil
 	case "mockservice":
 		return newMockService(), nil
 	default:

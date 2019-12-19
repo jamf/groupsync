@@ -37,12 +37,22 @@ func (m *Mapping) Diff() (DiffResult, error) {
 	var flattenedSrc []User
 
 	for _, src := range m.src {
-		for _, user := range src.group {
+		srcMembers, err := src.Members()
+		if err != nil {
+			return DiffResult{}, err
+		}
+
+		for _, user := range srcMembers {
 			flattenedSrc = append(flattenedSrc, user)
 		}
 	}
 
-	diff, err := Diff(flattenedSrc, m.tar.group, m.tar.svc)
+	tarMembers, err := m.tar.Members()
+	if err != nil {
+		return DiffResult{}, err
+	}
+
+	diff, err := Diff(flattenedSrc, tarMembers, m.tar.svc)
 	// Yes, the equality is intended here! Only cache the DiffResult
 	// if there was no error calculating it.
 	if err == nil {
@@ -120,8 +130,35 @@ func (m Mapping) String() string {
 
 type GroupIdent struct {
 	name  string
-	group []User
+	group *[]User
 	svc   string
+}
+
+func (i GroupIdent) Members() ([]User, error) {
+	if i.group == nil {
+		err := i.GetMembers()
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return *i.group, nil
+}
+
+func (i *GroupIdent) GetMembers() error {
+	svc, err := SvcFromString(i.svc)
+	if err != nil {
+		return err
+	}
+
+	grp, err := svc.GroupMembers(i.name)
+	if err != nil {
+		return err
+	}
+
+	i.group = &grp
+
+	return nil
 }
 
 func (y YAMLGroupIdent) intoGroupIdent() (GroupIdent, error) {
@@ -141,19 +178,9 @@ func ParseGroupIdent(str string) (GroupIdent, error) {
 		)
 	}
 
-	svc, err := SvcFromString(splitStr[0])
-	if err != nil {
-		return GroupIdent{}, err
-	}
-
-	grp, err := svc.GroupMembers(splitStr[1])
-	if err != nil {
-		return GroupIdent{}, err
-	}
-
 	result := GroupIdent{
 		name:  splitStr[1],
-		group: grp,
+		group: nil,
 		svc:   splitStr[0],
 	}
 

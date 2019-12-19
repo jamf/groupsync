@@ -131,6 +131,8 @@ func (y YAMLGroupIdent) intoGroupIdent() (GroupIdent, error) {
 }
 
 func ParseGroupIdent(str string) (GroupIdent, error) {
+	logger.Infof("Parsing group ident: %v", str)
+
 	splitStr := strings.SplitN(str, ":", 2)
 	if len(splitStr) != 2 {
 		return GroupIdent{}, fmt.Errorf(

@@ -39,12 +39,15 @@ func initConfig() error {
 	return nil
 }
 
-func getConfig() config {
+func getConfig() (config, error) {
 	if cfg == nil {
-		panic("config not initialized - this shouldn't happen")
+		err := initConfig()
+		if err != nil {
+			return config{}, err
+		}
 	}
 
-	return *cfg
+	return *cfg, nil
 }
 
 type ConfigError struct {

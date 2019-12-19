@@ -24,11 +24,16 @@ func SvcFromString(name string) (Service, error) {
 		return svc, nil
 	}
 
+	logger.Infof("Service %v not in cache; initializing.", name)
 	// if service wasn't found in the cache, attempt to initialize it
 	svc, err := newSvcFromName(name)
+	if err != nil {
+		return nil, err
+	}
+
 	saveSvcInCache(name, svc)
 
-	return svc, err
+	return svc, nil
 }
 
 func saveSvcInCache(name string, svc Service) {
@@ -41,6 +46,11 @@ func lookUpServiceInCache(name string) (svc Service, ok bool) {
 }
 
 func newSvcFromName(name string) (Service, error) {
+	cfg, err := getConfig()
+	if err != nil {
+		return nil, err
+	}
+
 	switch name {
 	case "ldap":
 		return NewLDAP(cfg.LDAP), nil

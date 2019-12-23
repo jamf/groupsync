@@ -1,20 +1,15 @@
-name: bump version and release
+name: release
+
 on:
   push:
-    branches:
-      - master
+    tags:
+      - "v*"
+
 jobs:
   release:
     runs-on: ubuntu-18.04
     steps:
     - uses: actions/checkout@master
-
-    - name: Bump version and push tag
-      uses: anothrNick/github-tag-action@master
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        DEFAULT_BUMP: patch
-        WITH_V: true
 
     - name: Set up Go 1.13
       uses: actions/setup-go@v1
@@ -24,24 +19,19 @@ jobs:
 
     - name: Check out code into the Go module directory
       uses: actions/checkout@v1
-
-    - name: Get version
-      id: version
-      run: |
-        echo "::set-output name=version::$(ci/get_version.sh)"
-      
-    - name: Build
-      run: ci/build_release.sh
     
-    - name: debug
-      run: echo ${{ steps.version.outputs.version }}
+    - name: Get the version
+      id: version
+      run: echo ::set-output name=version::${GITHUB_REF#refs/tags/}
+
+    - name: Build
+      run: ci/build_release.sh ${{ steps.version.outputs.version }}
 
     - name: Upload
       uses: "marvinpinto/action-automatic-releases@latest"
       with:
         repo_token: "${{ secrets.GITHUB_TOKEN }}"
         prerelease: false
-        automatic_release_tag: "${{ steps.version.outputs.version }}"
         files: |
           LICENSE
           groupsync-darwin

@@ -5,8 +5,24 @@
 Preparing for the first (`0.1.0`) release. Still got to work some kinks out, refactor, test. Use at your own peril!
 
 ## Installation
-Right now *groupsync* is available only from source. The plan is to add binaries and a docker image soon.
+### Binaries
+Binaries for Linux and MacOS are available for download in
+[GitHub Releases](https://github.com/jamf/groupsync/releases). These should
+be self-contained and require no real dependencies. You can use them like so:
 
+```
+./groupsync-linux help
+```
+
+Or you can put them somewhere like `/usr/local/bin/` and enjoy having them in
+your `PATH`:
+
+```
+mv groupsync-linux /usr/local/bin/groupsync
+groupsync help
+```
+
+### Build with Go
 You'll need *git* and the *[go toolchain](https://golang.org/doc/install)*.
 
 ```sh
@@ -58,6 +74,7 @@ groupsync sync -m mappings.yaml
 Here's an [example mappings file](examples/mappings.yaml). Note that it contains multiple mappings.
 
 ## Hacking
-Some developer's documentation (and possibly reference, but probably only as an afterthought) is in the plans - particularly a guide to adding new services. For now if you wish to implement any specific functionality, you might have to inquire a bit. Don't hesitate to get in touch by opening an issue!
+There is some aid for adding new [services](docs/services.md) and
+[targets](docs/targets.md).
 
-A refactor is probably in order too. Please don't hesitate to point out unreadable portions of code.
+If you get stuck there (or anywhere else), don't hesistate to open an issue!

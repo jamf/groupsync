@@ -28,6 +28,18 @@ func TestSvcCache(t *testing.T) {
 	}
 }
 
+func TestWrongServiceName(t *testing.T) {
+	var err error
+
+	_, err = SvcFromString("nope")
+	switch err.(type) {
+	case ServiceNotDefined:
+		t.Log("ServiceNotDefined thrown as it should be")
+	default:
+		panic("SvcFromString() doesn't throw ServiceNotDefined")
+	}
+}
+
 func TestDiffWithEmptySrc(t *testing.T) {
 	srcGrp := buildMockUsers(0, 0)
 	tarGrp := buildMockUsers(0, 3)

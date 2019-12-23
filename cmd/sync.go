@@ -111,19 +111,10 @@ func parseCLIMapping(args []string) (services.Mapping, error) {
 			return services.Mapping{}, err
 		}
 
-		err = src.GetMembers()
-		if err != nil {
-			return services.Mapping{}, err
-		}
 		sources = append(sources, src)
 	}
 
 	target, err := services.ParseGroupIdent(args[len(args)-1])
-	if err != nil {
-		return services.Mapping{}, err
-	}
-
-	err = target.GetMembers()
 	if err != nil {
 		return services.Mapping{}, err
 	}

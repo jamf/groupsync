@@ -6,6 +6,28 @@ import (
 	"testing"
 )
 
+func TestSvcCache(t *testing.T) {
+	svcInitCount = 0
+	var err error
+
+	_, err = SvcFromString("mockservice")
+	if err != nil {
+		panic(err)
+	}
+
+	_, err = SvcFromString("mockservice")
+	if err != nil {
+		panic(err)
+	}
+
+	if svcInitCount != 1 {
+		panic(fmt.Errorf(
+			"MockService should have been initialized once, not %v",
+			svcInitCount,
+		))
+	}
+}
+
 func TestDiffWithEmptySrc(t *testing.T) {
 	srcGrp := buildMockUsers(0, 0)
 	tarGrp := buildMockUsers(0, 3)

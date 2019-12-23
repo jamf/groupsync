@@ -2,10 +2,15 @@ package services
 
 import "fmt"
 
+// used for testing the service cache to verify the service gets initialized
+// only once
+var svcInitCount uint
+
 type MockService struct {
 }
 
 func newMockService() MockService {
+	svcInitCount += 1
 	return MockService{}
 }
 

@@ -6,11 +6,45 @@ import (
 	"testing"
 )
 
+func TestSvcCache(t *testing.T) {
+	svcInitCount = 0
+	var err error
+
+	_, err = SvcFromString("mockservice")
+	if err != nil {
+		panic(err)
+	}
+
+	_, err = SvcFromString("mockservice")
+	if err != nil {
+		panic(err)
+	}
+
+	if svcInitCount != 1 {
+		panic(fmt.Errorf(
+			"MockService should have been initialized once, not %v",
+			svcInitCount,
+		))
+	}
+}
+
+func TestWrongServiceName(t *testing.T) {
+	var err error
+
+	_, err = SvcFromString("nope")
+	switch err.(type) {
+	case ServiceNotDefined:
+		t.Log("ServiceNotDefined thrown as it should be")
+	default:
+		panic("SvcFromString() doesn't throw ServiceNotDefined")
+	}
+}
+
 func TestDiffWithEmptySrc(t *testing.T) {
 	srcGrp := buildMockUsers(0, 0)
 	tarGrp := buildMockUsers(0, 3)
 
-	_, _, err := Diff(srcGrp, tarGrp, "mockservice")
+	_, err := Diff(srcGrp, tarGrp, "mockservice")
 	switch err.(type) {
 	case SourceGroupEmptyError:
 	default:
@@ -30,9 +64,9 @@ func TestDiffWithOverlap(t *testing.T) {
 		srcGrp[0],
 	}
 
-	rem, add, _ := Diff(srcGrp, tarGrp, "mockservice")
+	diff, _ := Diff(srcGrp, tarGrp, "mockservice")
 
-	assertDiff(expectedRem, rem, expectedAdd, add)
+	assertDiff(expectedRem, diff.Rem, expectedAdd, diff.Add)
 }
 
 func TestDiffIdenticalGroups(t *testing.T) {
@@ -43,9 +77,9 @@ func TestDiffIdenticalGroups(t *testing.T) {
 
 	expectedAdd := []User{}
 
-	rem, add, _ := Diff(srcGrp, tarGrp, "mockservice")
+	diff, _ := Diff(srcGrp, tarGrp, "mockservice")
 
-	assertDiff(expectedRem, rem, expectedAdd, add)
+	assertDiff(expectedRem, diff.Rem, expectedAdd, diff.Add)
 }
 
 // Helpers

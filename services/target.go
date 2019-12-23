@@ -13,9 +13,14 @@ type Target interface {
 }
 
 func TargetFromString(name string) (Target, error) {
-	switch name {
-	case "github":
-		return githubSvc, nil
+	svc, err := SvcFromString(name)
+	if err != nil {
+		return nil, err
+	}
+
+	switch tar := svc.(type) {
+	case *GitHub:
+		return tar, nil
 	default:
 		return nil, newTargetNotDefined(name)
 	}

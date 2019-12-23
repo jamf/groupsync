@@ -13,15 +13,49 @@ type Service interface {
 	GroupMembers(group string) ([]User, error)
 }
 
-var ldapSvc *LDAP
-var githubSvc *GitHub
+var initializedServices map[string]Service = make(map[string]Service)
 
+// SvcFromString produces a Service object with config taken from the global
+// cfg variable.
 func SvcFromString(name string) (Service, error) {
+	// attempt to lookup an already initialized service
+	svc, ok := lookUpServiceInCache(name)
+	if ok {
+		return svc, nil
+	}
+
+	logger.Infof("Service %v not in cache; initializing.", name)
+	// if service wasn't found in the cache, attempt to initialize it
+	svc, err := newSvcFromName(name)
+	if err != nil {
+		return nil, err
+	}
+
+	saveSvcInCache(name, svc)
+
+	return svc, nil
+}
+
+func saveSvcInCache(name string, svc Service) {
+	initializedServices[name] = svc
+}
+
+func lookUpServiceInCache(name string) (svc Service, ok bool) {
+	svc, ok = initializedServices[name]
+	return
+}
+
+func newSvcFromName(name string) (Service, error) {
+	cfg, err := getConfig()
+	if err != nil {
+		return nil, err
+	}
+
 	switch name {
 	case "ldap":
-		return ldapSvc, nil
+		return NewLDAP(cfg.LDAP), nil
 	case "github":
-		return githubSvc, nil
+		return NewGitHub(cfg.GitHub), nil
 	case "mockservice":
 		return newMockService(), nil
 	default:
@@ -43,14 +77,26 @@ func (e ServiceNotDefined) Error() string {
 	return fmt.Sprintf("service `%s` not defined", e.serviceName)
 }
 
-func Diff(srcGrp, tarGrp []User, tar string) (rem, add []User, err error) {
+type DiffResult struct {
+	Rem []User
+	Add []User
+}
+
+func newDiffResult(rem, add []User) DiffResult {
+	return DiffResult{
+		Rem: rem,
+		Add: add,
+	}
+}
+
+func Diff(srcGrp, tarGrp []User, tar string) (DiffResult, error) {
 	// Build hashmaps of identities for faster lookup.
 	// This approach also takes care of duplicates for free.
 	srcMap := make(map[string]User)
 	tarMap := make(map[string]User)
 
 	if len(srcGrp) < 1 {
-		return nil, nil, newSourceGroupEmptyError()
+		return DiffResult{}, newSourceGroupEmptyError()
 	}
 
 	for _, u := range srcGrp {
@@ -58,7 +104,7 @@ func Diff(srcGrp, tarGrp []User, tar string) (rem, add []User, err error) {
 		if e != nil {
 			switch e.(type) {
 			case FatalError:
-				return nil, nil, e
+				return DiffResult{}, e
 			default:
 				logger.Warningf(
 					"error acquiring identity for a user - skipping\n"+
@@ -96,6 +142,9 @@ func Diff(srcGrp, tarGrp []User, tar string) (rem, add []User, err error) {
 		}
 	}
 
+	var add []User
+	var rem []User
+
 	// What's left in srcIdentities and tarIdentities is what we have to
 	// add/remove.
 	for _, identity := range srcMap {
@@ -106,7 +155,7 @@ func Diff(srcGrp, tarGrp []User, tar string) (rem, add []User, err error) {
 		rem = append(rem, identity)
 	}
 
-	return
+	return newDiffResult(rem, add), nil
 }
 
 type SourceGroupEmptyError struct {

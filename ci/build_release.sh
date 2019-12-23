@@ -4,7 +4,7 @@
 # This creates a release build.
 
 if [[ -z "$1" ]]; then
-    version="$(git describe --always --dirty)"
+    version="$(git describe --tags --always --dirty)"
 else
     version=$1    
 fi

@@ -74,6 +74,7 @@ groupsync sync -m mappings.yaml
 Here's an [example mappings file](examples/mappings.yaml). Note that it contains multiple mappings.
 
 ## Hacking
-Some developer's documentation (and possibly reference, but probably only as an afterthought) is in the plans - particularly a guide to adding new services. For now if you wish to implement any specific functionality, you might have to inquire a bit. Don't hesitate to get in touch by opening an issue!
+There is some aid for adding new [services](docs/services.md) and
+[targets](docs/targets.md).
 
-A refactor is probably in order too. Please don't hesitate to point out unreadable portions of code.
+If you get stuck there (or anywhere else), don't hesistate to open an issue!

@@ -33,10 +33,10 @@ After all that is done, get a dev build going:
 ci/build.sh
 ```
 
-Then test if the following work:
+If it builds, test if the following work as expected:
 
 ```
-./groupsync ls yourservice
+./groupsync ls yourservice yourgroup
 ./groupsync sync -d "yourservice:yourgroup" "otherservice:othergroup"
 ```
 

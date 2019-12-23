@@ -78,14 +78,17 @@ var syncCmd = &cobra.Command{
 func parseFileMappings(filename string) ([]services.Mapping, error) {
 	var mappings []services.Mapping
 
-	data, err := ioutil.ReadFile(MappingFile)
+	data, err := ioutil.ReadFile(filename)
 	if err != nil {
 		return nil, err
 	}
 
 	var mappingData []services.YAMLMapping
 
-	yaml.Unmarshal(data, &mappingData)
+	err = yaml.Unmarshal(data, &mappingData)
+	if err != nil {
+		return nil, err
+	}
 
 	for _, mapping := range mappingData {
 		mappings = append(mappings, mapping.IntoMapping())
@@ -107,6 +110,7 @@ func parseCLIMapping(args []string) (services.Mapping, error) {
 		if err != nil {
 			return services.Mapping{}, err
 		}
+
 		sources = append(sources, src)
 	}
 

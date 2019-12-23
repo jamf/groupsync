@@ -42,7 +42,7 @@ jobs:
         repo_token: "${{ secrets.GITHUB_TOKEN }}"
         prerelease: false
         automatic_release_tag: "${{ steps.version.outputs.version }}"
-        # files: |
-        #   LICENSE
-        #   groupsync-darwin
-        #   groupsync-linux
+        files: |
+          LICENSE
+          groupsync-darwin
+          groupsync-linux

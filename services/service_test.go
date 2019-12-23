@@ -6,6 +6,40 @@ import (
 	"testing"
 )
 
+func TestSvcCache(t *testing.T) {
+	svcInitCount = 0
+	var err error
+
+	_, err = SvcFromString("mockservice")
+	if err != nil {
+		panic(err)
+	}
+
+	_, err = SvcFromString("mockservice")
+	if err != nil {
+		panic(err)
+	}
+
+	if svcInitCount != 1 {
+		panic(fmt.Errorf(
+			"MockService should have been initialized once, not %v",
+			svcInitCount,
+		))
+	}
+}
+
+func TestWrongServiceName(t *testing.T) {
+	var err error
+
+	_, err = SvcFromString("nope")
+	switch err.(type) {
+	case ServiceNotDefined:
+		t.Log("ServiceNotDefined thrown as it should be")
+	default:
+		panic("SvcFromString() doesn't throw ServiceNotDefined")
+	}
+}
+
 func TestDiffWithEmptySrc(t *testing.T) {
 	srcGrp := buildMockUsers(0, 0)
 	tarGrp := buildMockUsers(0, 3)

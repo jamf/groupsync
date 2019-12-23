@@ -7,7 +7,6 @@ import (
 
 	"github.com/google/logger"
 	"github.com/jamf/groupsync/cmd"
-	"github.com/jamf/groupsync/services"
 	"github.com/logrusorgru/aurora"
 )
 
@@ -26,11 +25,6 @@ func main() {
 		fmt.Println(
 			aurora.Red("You're using a dev build of groupsync."),
 		)
-	}
-
-	err := services.Init()
-	if err != nil {
-		logger.Fatal(err)
 	}
 
 	cmd.Execute()

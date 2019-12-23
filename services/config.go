@@ -21,11 +21,13 @@ func initConfig() error {
 	}
 
 	viper.SetConfigName("groupsync")
+	viper.SetDefault("LDAP", LDAPConfig{})
+	viper.SetDefault("GitHub", GitHubConfig{})
 	viper.AddConfigPath("/etc/groupsync/")
 	viper.AddConfigPath("$HOME/.groupsync/")
 	viper.AddConfigPath(".")
 	err := viper.ReadInConfig()
-	if err != nil {
+	if err != nil && configFileMustExist {
 		return newConfigError(err)
 	}
 

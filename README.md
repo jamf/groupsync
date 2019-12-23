@@ -5,8 +5,24 @@
 Preparing for the first (`0.1.0`) release. Still got to work some kinks out, refactor, test. Use at your own peril!
 
 ## Installation
-Right now *groupsync* is available only from source. The plan is to add binaries and a docker image soon.
+### Binaries
+Binaries for Linux and MacOS are available for download in
+[GitHub Releases](https://github.com/jamf/groupsync/releases). These should
+be self-contained and require no real dependencies. You can use them like so:
 
+```
+./groupsync-linux help
+```
+
+Or you can put them somewhere like `/usr/local/bin/` and enjoy having them in
+your `PATH`:
+
+```
+mv groupsync-linux /usr/local/bin/groupsync
+groupsync help
+```
+
+### Build with Go
 You'll need *git* and the *[go toolchain](https://golang.org/doc/install)*.
 
 ```sh

@@ -1,9 +1,6 @@
 # groupsync
 *groupsync* is a CLI tool for syncing user group membership info from a directory (like LDAP) to a service like GitHub.
 
-## Status
-Preparing for the first (`0.1.0`) release. Still got to work some kinks out, refactor, test. Use at your own peril!
-
 ## Installation
 ### Binaries
 Binaries for Linux and MacOS are available for download in

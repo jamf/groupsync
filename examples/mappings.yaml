@@ -1,6 +1,9 @@
 - sources:
   - service: ldap
     group: my-group
+  users:
+  - github-user-login1
+  - github-user-login2
   target:
     service: github
     group: my-team

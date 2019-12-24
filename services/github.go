@@ -138,6 +138,29 @@ func (g *GitHub) acquireIdentity(user *User) (Identity, error) {
 	)
 }
 
+func (g *GitHub) identityFromUID(login string) (Identity, error) {
+	g.initClient()
+
+	var userQuery struct {
+		User GitHubIdentity `graphql:"user(login: $login)"`
+	}
+
+	vars := map[string]interface{}{
+		"login": githubv4.String(login),
+	}
+
+	err := g.v4client.Query(
+		context.Background(),
+		&userQuery,
+		vars,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return userQuery.User, nil
+}
+
 func (g GitHub) AddMembers(teamSlug string, users []User) error {
 	g.initClient()
 

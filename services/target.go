@@ -7,6 +7,7 @@ type Target interface {
 	AddMembers(team string, users []User) error
 	RemoveMembers(team string, users []User) error
 	acquireIdentity(user *User) (Identity, error)
+	identityFromUID(uid string) (Identity, error)
 
 	// Target implementors should also implement Service.
 	GroupMembers(group string) ([]User, error)

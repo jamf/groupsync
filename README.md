@@ -70,6 +70,8 @@ groupsync sync -m mappings.yaml
 
 Here's an [example mappings file](examples/mappings.yaml). Note that it contains multiple mappings.
 
+It is possible to also provide a hardcoded list of users in a mappings file - see the above example. This can be useful for service accounts that aren't in LDAP.
+
 ## Hacking
 There is some aid for adding new [services](docs/services.md) and
 [targets](docs/targets.md).

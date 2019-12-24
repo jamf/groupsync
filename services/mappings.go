@@ -13,9 +13,10 @@ import (
 
 //A Mapping is a single Mapping of source group(s) onto a target group.
 type Mapping struct {
-	src  []GroupIdent
-	tar  GroupIdent
-	diff *DiffResult
+	src   []GroupIdent
+	users []string
+	tar   GroupIdent
+	diff  *DiffResult
 }
 
 func NewMapping(src []GroupIdent, tar GroupIdent) Mapping {
@@ -45,6 +46,28 @@ func (m *Mapping) Diff() (DiffResult, error) {
 		for _, user := range srcMembers {
 			flattenedSrc = append(flattenedSrc, user)
 		}
+	}
+
+	targetSvc, err := TargetFromString(m.tar.svc)
+	if err != nil {
+		return DiffResult{}, err
+	}
+
+	for _, uid := range m.users {
+		user := newUser()
+		identity, err := targetSvc.identityFromUID(uid)
+		if err != nil {
+			logger.Errorf(
+				"Error finding user ID %v in %v. %v",
+				uid,
+				m.tar.svc,
+				err,
+			)
+			continue
+		}
+		user.addIdentity(m.tar.svc, identity)
+
+		flattenedSrc = append(flattenedSrc, user)
 	}
 
 	tarMembers, err := m.tar.Members()
@@ -96,6 +119,16 @@ func (m Mapping) String() string {
 				"- %s:%s\n",
 				aurora.Cyan(src.svc),
 				aurora.Blue(src.name),
+			),
+		)
+	}
+
+	b.WriteString(m.tar.svc + " users:\n")
+	for _, user := range m.users {
+		b.WriteString(
+			fmt.Sprintf(
+				"- %s\n",
+				aurora.Cyan(user),
 			),
 		)
 	}
@@ -190,6 +223,7 @@ func ParseGroupIdent(str string) (GroupIdent, error) {
 // YAMLMapping is a mapping parsed from a YAML mappings file.
 type YAMLMapping struct {
 	Sources []YAMLGroupIdent
+	Users   []string
 	Target  YAMLGroupIdent
 }
 
@@ -217,7 +251,8 @@ func (y YAMLMapping) IntoMapping() Mapping {
 	}
 
 	return Mapping{
-		src: sources,
-		tar: target,
+		src:   sources,
+		users: y.Users,
+		tar:   target,
 	}
 }

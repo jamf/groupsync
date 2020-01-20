@@ -56,6 +56,8 @@ func newSvcFromName(name string) (Service, error) {
 		return NewLDAP(cfg.LDAP), nil
 	case "github":
 		return NewGitHub(cfg.GitHub), nil
+	case "appstoreconnect":
+		return NewAppStoreConnect(cfg.AppStoreConnect), nil
 	case "mockservice":
 		return newMockService(), nil
 	default:

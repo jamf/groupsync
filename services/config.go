@@ -7,8 +7,9 @@ import (
 )
 
 type config struct {
-	LDAP   LDAPConfig
-	GitHub GitHubConfig
+	LDAP            LDAPConfig
+	GitHub          GitHubConfig
+	AppStoreConnect AppStoreConnectConfig
 }
 
 var cfg *config = nil
@@ -23,6 +24,7 @@ func initConfig() error {
 	viper.SetConfigName("groupsync")
 	viper.SetDefault("LDAP", LDAPConfig{})
 	viper.SetDefault("GitHub", GitHubConfig{})
+	viper.SetDefault("AppStoreConnect", AppStoreConnectConfig{})
 	viper.AddConfigPath("/etc/groupsync/")
 	viper.AddConfigPath("$HOME/.groupsync/")
 	viper.AddConfigPath(".")

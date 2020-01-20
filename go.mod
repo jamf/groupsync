@@ -4,6 +4,7 @@ go 1.13
 
 require (
 	docker.io/go-docker v1.0.0
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/docker/distribution v2.7.1+incompatible // indirect
 	github.com/docker/go-connections v0.4.0
 	github.com/docker/go-units v0.4.0 // indirect
